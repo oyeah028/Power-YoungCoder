@@ -1,0 +1,2164 @@
+/* ==UserStyle==
+@name         Power-YoungCoder
+@namespace    https://github.com/oyeah028/Power-YoungCoder
+@version      1.1.0
+@description  为 YoungCoder 修改设计：亮/暗双配色、可开关的亚克力材质、自定义背景与字体，并保留原有的圆角。改版后的站点把组件颜色收拢成了 CSS 变量（--home-*、--list-*、--yc-* 等），脚本会把它们一并映射到本主题调色板，避免新版组件保持站点原色。
+@author       oyeah(deepseek二开)
+@license      CC-BY-NC-SA-4.0
+@preprocessor stylus
+
+@var checkbox dark-mode "深色模式" 1
+
+@var text font-stack "全局字体" "'Inter','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif"
+@var text font-stack-codeblock "代码块字体" "'Fira Code','JetBrains Mono','Noto Sans SC',monospace"
+
+@var select bg-preset "背景方案" {
+    "自定义（用下面的链接）": "custom",
+}
+@var text main-background "自定义背景图片（写成 url(...) 形式）" "url(https://pic.imgdb.cn/item/62df71a5f54cd3f9376f351d.jpg)"
+@var checkbox background-fixed "背景固定不随页面滚动" 1
+
+@var text content-opacity "内容不透明度（0 为完全透明，1 为不透明）" 1
+
+@var checkbox header-acrylic "顶栏亚克力效果" 1
+@var checkbox nav-acrylic "侧栏亚克力效果" 1
+@var checkbox card-acrylic "卡片亚克力效果" 1
+@var checkbox footer-acrylic "底栏亚克力效果" 1
+@var checkbox anymore-acrylic "其余亚克力效果" 1
+
+@var checkbox animations "动画" 1
+==/UserStyle== */
+
+@-moz-document domain("hydro.ac"), domain("youngcoder.cn")
+
+    //! 调色板 ---------------------------------------------------------
+
+    if dark-mode
+        // 全局
+        body_bg_color = #181c27
+        navbar_bg_color = #1f3144
+        navbar_text_color = #d0d0d0
+        header_bg_color = #1f3144
+        text_color = #c4c6c9
+        sec_text_color = #a7a9ad
+        board_color = #252d38
+        post_text_color = #c4c6c9
+        post_heading_color = #c4c6c9
+        post_link_color = #1589e9
+        link_hover_color = #30a9de
+        line_color = #435266
+        noMatterLineColor = #43526618
+        // 组件
+        button_text_color = #d0d0d0
+        button_hover_bg_color = #46647e
+        selection_bg_color = #9696c84d
+        acrylic_bg_color = #000000
+        textBoxBackgroudColor = #8080ad3d
+        // 代码
+        codeblock_bg_color = #0d1117
+        inlinecode_bg_color = #636e7b66
+        codeblock_text_color = #c9d1d9
+        codeblock_line_color = #30363d
+        // 滚动条
+        scrollbar_track_color = #181c27
+        scrollbar_thumb_color = #687582
+        scrollbar_hover_color = #5e72e4
+        // 语法高亮（Prism），null 表示沿用站点自带配色
+        token_comment_color = #8b949e
+        token_string_color = #a5d6ff
+        token_keyword_color = #ff7b72
+        token_function_color = #d2a8ff
+        token_number_color = #79c0ff
+        token_punct_color = #c9d1d9
+        token_class_color = #7ee787
+        token_attr_color = #ffa657
+        token_regex_color = #a5d6ff
+        // 站点自绘组件的语义色（把站点的 CSS 变量拉到本主题调色板，
+        // 见“站点组件变量”一节）。canvas 是页面底色，surface 是面板，
+        // raised/inset/alternate 分别是次级面板、凹陷区域、斑马纹，
+        // separator 是分隔线，primary/secondary 是正文与次要文字
+        canvas_color = body_bg_color
+        surface_color = board_color
+        raised_color = #2b3442
+        inset_color = #1b202a
+        alternate_color = #212a36
+        hover_color = #303c4b
+        separator_color = line_color
+        primary_text_color = post_text_color
+        secondary_text_color = sec_text_color
+    else
+        body_bg_color = #eee
+        navbar_bg_color = #eeeeee
+        navbar_text_color = #3c4858
+        header_bg_color = #5eafca // Hydro 原本的顶栏蓝，保留品牌色
+        text_color = #3c4858
+        sec_text_color = #718096
+        board_color = #fff
+        post_text_color = #2c3e50
+        post_heading_color = #1a202c
+        post_link_color = #0366d6
+        link_hover_color = #5f9fd6
+        line_color = #e4e4e4
+        button_text_color = #555
+        button_hover_bg_color = #f2f3f5
+        selection_bg_color = #95bce3
+        acrylic_bg_color = #ffffff
+        codeblock_bg_color = #f8f8f8
+        inlinecode_bg_color = #636e7b26
+        codeblock_text_color = #393a34
+        codeblock_line_color = #e4e4e4
+        scrollbar_track_color = #eeeeee
+        scrollbar_thumb_color = #c4c6c9
+        scrollbar_hover_color = #a6a6a6
+        token_comment_color = null
+        token_string_color = null
+        token_keyword_color = null
+        token_function_color = null
+        token_number_color = null
+        token_punct_color = null
+        token_class_color = null
+        token_attr_color = null
+        token_regex_color = null
+        // 见深色分支的同名变量
+        canvas_color = body_bg_color
+        surface_color = board_color
+        raised_color = #f4f7fb
+        inset_color = #fafbfd
+        alternate_color = #fbfcfe
+        hover_color = button_hover_bg_color
+        separator_color = line_color
+        primary_text_color = post_text_color
+        secondary_text_color = sec_text_color
+
+    // 背景方案 -> 实际背景值
+    bg = main-background
+    if bg-preset == 'monterey'
+        bg = url(https://pic.imgdb.cn/item/62df71a5f54cd3f9376f351d.jpg)
+    else if bg-preset == 'crystal'
+        bg = url(http://www.pptbz.com/d/file/p/201708/a1d07b6201af8f574b6539cb724bbc16.png)
+    else if bg-preset == 'cloud'
+        bg = url(https://i.loli.net/2020/02/21/9uHQ2rLmTvkFtMj.png)
+    else if bg-preset == 'anime'
+        bg = url(https://c-ssl.duitang.com/uploads/item/201503/14/20150314184557_aPEfj.jpeg)
+    else if bg-preset == 'random'
+        bg = url(https://picsum.photos/1920/1080)
+    else if bg-preset == 'random-blur'
+        bg = url(https://picsum.photos/1920/1080?blur=10)
+    else if bg-preset == 'vijos'
+        bg = url(https://i.loli.net/2019/08/01/5d42d1bb1b30749952.png)
+    else if bg-preset == 'solid'
+        bg = none
+    // 'custom'：bg 保持 main-background
+
+    // 背景图加载完成前的兜底底色。
+    // 这里必须用主题底色而不是 bg-color：深色模式下 bg-color 默认是 #F7F7F7，
+    // 4MB 的壁纸加载期间整页会是浅色，看起来就跟站点原版界面一样
+    if bg-preset == 'solid'
+        panel_bg_color = bg-color
+    else
+        panel_bg_color = body_bg_color
+
+    //! 亚克力材质 -----------------------------------------------------
+
+    // 基于伪元素的实现，不会造成层叠混乱
+    acrylic(arc-opacity=0.5, blur-radius=10px, no_shadow=false)
+        background none !important
+        &:before
+            acr-bgcolor = rgba(acrylic_bg_color, arc-opacity)
+            background acr-bgcolor !important
+            // Safari 与旧版 Chromium 只认 -webkit- 前缀，缺了它亚克力会退化成
+            // 一层纯色（看起来就像卡片没生效）
+            -webkit-backdrop-filter blur(blur-radius) !important unless blur-radius == 0
+            backdrop-filter blur(blur-radius) !important unless blur-radius == 0
+            box-shadow    0 1px    3px    rgba(0, 0, 0, .01),
+                        0 1px    8px        rgba(0, 0, 0, 0.2) unless no_shadow !important
+            // 必须显式声明：vj4 的 clearfix 会给 .section:before 设置 display: table，
+            // 而 display: table 的绝对定位元素会收缩成 0x0，导致亚克力完全不显示
+            display block
+            content    ""
+            border-radius inherit
+            position absolute
+            pointer-events none
+            z-index -1
+            top 0
+            left 0
+            right 0
+            bottom 0
+
+    // 直接改背景的实现，不需要动 z-index，也不会影响 border-radius
+    acrylic-bg(arc-opacity=0.5, blur-radius=10px, no_shadow=false)
+        acr-bgcolor = rgba(acrylic_bg_color, arc-opacity)
+        background acr-bgcolor !important
+        -webkit-backdrop-filter blur(blur-radius) !important unless blur-radius == 0
+        backdrop-filter blur(blur-radius) !important unless blur-radius == 0
+        box-shadow    0 1px    3px    rgba(0, 0, 0, .01),
+                    0 1px    8px        rgba(0, 0, 0, 0.2) unless no_shadow !important
+
+    // 指定底色的玻璃材质。顶栏自带品牌色（浅色下是 Hydro 的蓝），
+    // 用 acrylic_bg_color 的话浅色下会变成白色，白色 logo 就看不见了
+    glass(tint-color, arc-opacity=0.5, blur-radius=10px)
+        background-color rgba(tint-color, arc-opacity) !important
+        -webkit-backdrop-filter blur(blur-radius) !important unless blur-radius == 0
+        backdrop-filter blur(blur-radius) !important unless blur-radius == 0
+        box-shadow    0 1px    3px    rgba(0, 0, 0, .01),
+                    0 1px    8px        rgba(0, 0, 0, 0.2) !important
+
+    //! 全局 -----------------------------------------------------------
+
+    html, body
+        scroll-behavior smooth
+        background-color panel_bg_color !important
+
+    // 页面背景：vj4 的 #panel 才是真正铺底色的容器（原本是 #edf0f2）
+    // 只改 .main 的话顶栏、底栏前后的底色仍然会盖住背景图
+    #panel
+        background-color panel_bg_color !important
+        background-image bg !important
+        background-repeat no-repeat !important
+        background-size cover !important
+        background-position center !important
+        if background-fixed
+            // “不随页面滚动”用 fixed 定位的伪元素实现，而不是 background-attachment: fixed。
+            // 后者的定位区域依赖视口，视口变化后可能仍按旧视口尺寸绘制（实测只铺满
+            // 约一半视口，右侧和下侧露出背景色）。这里伪元素叠在 #panel 自己的背景图
+            // 之上，即使伪元素没铺满，下面也有兜底，不会露底
+            &::before
+                content ""
+                position fixed
+                top 0
+                left 0
+                right 0
+                bottom 0
+                z-index -1
+                pointer-events none
+                background-image bg
+                background-repeat no-repeat
+                background-size cover
+                background-position center
+
+    // 站点自带的沉浸式布局背景
+    .layout--immersive #panel
+    .layout--immersive .header
+        background-image none !important
+
+    .main
+        background none !important
+
+    *::selection
+        background selection_bg_color
+
+    ::-webkit-scrollbar
+        background scrollbar_track_color
+        width 7px
+        height 7px
+    ::-webkit-scrollbar-thumb
+        background scrollbar_thumb_color
+    ::-webkit-scrollbar-thumb:hover
+        background scrollbar_hover_color
+    ::-webkit-scrollbar-corner
+        background-color transparent
+
+    body
+        // 注意：Stylus 注入的 @var 值是原样文本（'Inter','Noto Sans SC',…），
+        // 直接当值用即可。套 unquote() 只会剩下第一项，字体反而失效
+        font-family font-stack !important
+        color text_color !important
+
+    // 站点给不少组件单独写死了文字色（例如 .training__intro 的 #777），
+    // 加 !important 才能压住；后代元素自己的 color 规则依然优先，不受影响
+    .main
+        color post_text_color !important
+
+    code, pre, .code-toolbar
+        font-family font-stack-codeblock !important
+
+    //! 站点组件变量 ------------------------------------------------
+
+    // 改版后的站点把组件颜色都收拢成了 CSS 变量（--home-*、--list-*、--yc-*
+    // 等等），每个变量自带一套浅色值，站点自己的深色模式再换成另一套。脚本是
+    // 独立强制配色的（不跟随站点主题开关），所以必须自己把这批变量写一遍，
+    // 否则作业/比赛/课程/消息这些新版组件会始终保持站点原本的浅色底。
+    //
+    // 取值规则：中性用途（底色、分隔线、正文）映射到本主题调色板；带色相的
+    // （状态色、提示色、主题强调色）沿用站点自己的值，避免把语义色抹平。只对
+    // 站点会随主题切换的变量做处理，纯版式变量（宽高、间距、圆角）不碰。
+    // 站点改版后可以用仓库里的 tools/gen-tokens 重新生成这一段。
+
+
+    site-token-values-light()
+        --article-blue: #1677d2 !important
+        --article-code: inset_color !important
+        --article-ink: primary_text_color !important
+        --article-inline: #fff1f0 !important
+        --article-inline-ink: #d4382c !important
+        --article-line: separator_color !important
+        --article-muted: secondary_text_color !important
+        --article-soft: raised_color !important
+        --article-title: primary_text_color !important
+        --auth-bg: surface_color !important
+        --auth-ink: #223445 !important
+        --auth-input: inset_color !important
+        --auth-line: separator_color !important
+        --auth-muted: secondary_text_color !important
+        --author-stats-bg: surface_color !important
+        --author-stats-ink: primary_text_color !important
+        --author-stats-line: separator_color !important
+        --author-stats-muted: #8494aa !important
+        --bulletin-bg: surface_color !important
+        --bulletin-blue: #1678d7 !important
+        --bulletin-button: #e8f3ff !important
+        --bulletin-ink: primary_text_color !important
+        --bulletin-line: separator_color !important
+        --bulletin-muted: #8494aa !important
+        --bulletin-soft: raised_color !important
+        --ca-blue-soft: #e8f3ff !important
+        --ca-selected: hover_color !important
+        --contest-accent: #1677d2 !important
+        --contest-accent-bg: #e8f3ff !important
+        --contest-hover: hover_color !important
+        --contest-ink: primary_text_color !important
+        --contest-line: separator_color !important
+        --contest-muted: #8493a6 !important
+        --contest-problem-alternate: alternate_color !important
+        --contest-problem-hover: #e8f3ff !important
+        --contest-raised: raised_color !important
+        --contest-success: #2e8367 !important
+        --contest-success-bg: #eaf6f0 !important
+        --contest-surface: surface_color !important
+        --contest-tab-active: hover_color !important
+        --contest-tab-blue: #1678d7 !important
+        --contest-tab-muted: #8494aa !important
+        --contest-tab-selected: #e8f3ff !important
+        --contest-tab-soft: raised_color !important
+        --contest-tab-surface: surface_color !important
+        --copy-accent: #1677d2 !important
+        --copy-bg: surface_color !important
+        --copy-blue: #eaf4ff !important
+        --copy-ink: primary_text_color !important
+        --copy-input: inset_color !important
+        --copy-line: separator_color !important
+        --copy-muted: secondary_text_color !important
+        --copy-scroll: #a8bdcb !important
+        --copy-soft: raised_color !important
+        --course-blue: #1677d2 !important
+        --course-blue-light: #eaf4ff !important
+        --course-border: separator_color !important
+        --course-indigo: #5967c7 !important
+        --course-muted: secondary_text_color !important
+        --course-surface: surface_color !important
+        --course-text: primary_text_color !important
+        --detail-accepted-bg: #e9f5ef !important
+        --detail-accepted-ink: #36765c !important
+        --detail-bg: surface_color !important
+        --detail-id: #426fa5 !important
+        --detail-ink: #344256 !important
+        --detail-line: separator_color !important
+        --detail-muted: secondary_text_color !important
+        --detail-rate-fill: #00cf91 !important
+        --detail-rate-track: inset_color !important
+        --detail-record-bg: #fff1df !important
+        --detail-record-ink: #99601f !important
+        --detail-stat-bg: #eaf2ff !important
+        --detail-stat-ink: #426fa6 !important
+        --detail-tag-bg: surface_color !important
+        --detail-tag-ink: #69798e !important
+        --discussion-active: hover_color !important
+        --discussion-blue: #1678d7 !important
+        --discussion-blue-soft: #e8f3ff !important
+        --discussion-hover: #e8f3ff !important
+        --discussion-ink: primary_text_color !important
+        --discussion-input: inset_color !important
+        --discussion-line: separator_color !important
+        --discussion-meta: #66758a !important
+        --discussion-muted: #8494aa !important
+        --discussion-pending-action-bg: #fff1b8 !important
+        --discussion-pending-action-ink: #ad6800 !important
+        --discussion-pending-bg: #fff5df !important
+        --discussion-pending-border: #faad14 !important
+        --discussion-pending-ink: #a97816 !important
+        --discussion-pending-label-bg: #faad14 !important
+        --discussion-pending-label-ink: primary_text_color !important
+        --discussion-pending-row: #fffaf0 !important
+        --discussion-pending-row-hover: #fffaf0 !important
+        --discussion-resubmit-action-bg: #bae0ff !important
+        --discussion-resubmit-action-ink: #0958d9 !important
+        --discussion-resubmit-bg: #e8f3ff !important
+        --discussion-resubmit-border: #1677ff !important
+        --discussion-resubmit-ink: #1678d7 !important
+        --discussion-resubmit-label-bg: #1677ff !important
+        --discussion-resubmit-label-ink: primary_text_color !important
+        --discussion-resubmit-row: #f0f7ff !important
+        --discussion-resubmit-row-hover: #e6f0ff !important
+        --discussion-soft: raised_color !important
+        --discussion-surface: surface_color !important
+        --file-dialog-accent: #1677d2 !important
+        --file-dialog-bg: surface_color !important
+        --file-dialog-blue: #eaf4ff !important
+        --file-dialog-ink: primary_text_color !important
+        --file-dialog-input: inset_color !important
+        --file-dialog-line: separator_color !important
+        --file-dialog-muted: secondary_text_color !important
+        --file-dialog-red: #cf4353 !important
+        --file-dialog-red-bg: #fff1f3 !important
+        --file-dialog-scroll: #a8bdcb !important
+        --file-dialog-soft: raised_color !important
+        --focus-border: #007fd4 !important
+        --home-blue: #1678d7 !important
+        --home-hover: #e8f3ff !important
+        --home-ink: primary_text_color !important
+        --home-line: separator_color !important
+        --home-muted: #8494aa !important
+        --home-soft: raised_color !important
+        --home-surface: surface_color !important
+        --home-tile-hover-border: #b0cfee !important
+        --hw-blue: #1678d7 !important
+        --hw-blue-soft: #e8f3ff !important
+        --hw-ended: #66758a !important
+        --hw-ended-soft: raised_color !important
+        --hw-ink: primary_text_color !important
+        --hw-input: inset_color !important
+        --hw-line: separator_color !important
+        --hw-muted: #8494aa !important
+        --hw-row-hover: #e8f3ff !important
+        --hw-scroll: #b3c6d8 !important
+        --hw-soft: raised_color !important
+        --hw-success: #25836c !important
+        --hw-success-soft: #eaf7f1 !important
+        --hw-surface: surface_color !important
+        --hw-tab-selected: hover_color !important
+        --hw-warn: #b37b19 !important
+        --hw-warn-soft: #fff7e7 !important
+        --list-blue: #1678d7 !important
+        --list-blue-soft: #e8f3ff !important
+        --list-hover: #e8f3ff !important
+        --list-ink: primary_text_color !important
+        --list-input: inset_color !important
+        --list-line: separator_color !important
+        --list-muted: #8494aa !important
+        --list-rule-bg: surface_color !important
+        --list-rule-ink: #475d78 !important
+        --list-scroll: #b3c6d8 !important
+        --list-soft: raised_color !important
+        --list-success: #25836c !important
+        --list-success-soft: #eaf7f1 !important
+        --list-surface: surface_color !important
+        --md-modal-mask: #00000073 !important
+        --md-theme-bg-color-scrollbar-thumb: surface_color !important
+        --md-theme-code-copy-tips-color: inset_color !important
+        --md-theme-del-color: #ccc !important
+        --md-theme-slct-bg-color: rgba(175,207,247,.25) !important
+        --md-theme-slct-del-color: #999 !important
+        --md-theme-slct-prebg-color: rgba(160,200,255,.25) !important
+        --md-theme-table-color: #000 !important
+        --node-active: #e8f3ff !important
+        --node-blue: #1678d7 !important
+        --pl-alt: alternate_color !important
+        --pl-bg: surface_color !important
+        --pl-blue: #1678d7 !important
+        --pl-blue-soft: #e8f3ff !important
+        --pl-fail: #c94a56 !important
+        --pl-fail-soft: #fff0f1 !important
+        --pl-head: raised_color !important
+        --pl-hover: #e8f3ff !important
+        --pl-line: separator_color !important
+        --pl-muted: #8494aa !important
+        --pl-scroll: #b3c6d8 !important
+        --pl-success: #25836c !important
+        --pl-success-soft: #eaf7f1 !important
+        --pl-tag-bg: surface_color !important
+        --pl-tag-text: #69798e !important
+        --pl-text: primary_text_color !important
+        --rank-blue: #1678d7 !important
+        --rank-blue-soft: #e8f3ff !important
+        --separator-border: separator_color !important
+        --sidebar-accent: #1677d2 !important
+        --sidebar-accent-soft: #eaf4ff !important
+        --sidebar-bg: surface_color !important
+        --sidebar-ink: primary_text_color !important
+        --sidebar-line: separator_color !important
+        --sidebar-muted: secondary_text_color !important
+        --sidebar-scroll: #a8bdcb !important
+        --sidebar-soft: raised_color !important
+        --state-ended-bg: surface_color !important
+        --state-ended-ink: #66758a !important
+        --state-upcoming-bg: #eee8ff !important
+        --state-upcoming-ink: #7355b1 !important
+        --statement-accent: #2687df !important
+        --statement-button: #e8f2fc !important
+        --statement-code: inset_color !important
+        --statement-ink: #35445a !important
+        --statement-inline: #edf3fa !important
+        --statement-line: separator_color !important
+        --statement-muted: #75869a !important
+        --statement-scroll: #a8bdcb !important
+        --statement-scroll-hover: #91a9bc !important
+        --statement-soft: raised_color !important
+        --statement-tab-active: #1677d2 !important
+        --statement-tab-bg: #eaf4ff !important
+        --statement-tab-hover: hover_color !important
+        --statement-tab-ink: #75869a !important
+        --statement-tab-line: separator_color !important
+        --statement-title: #25364b !important
+        --yc-callout-note-badge: #e4f0fc !important
+        --yc-callout-note-bg: surface_color !important
+        --yc-callout-note-icon: #2477bd !important
+        --yc-callout-note-line: secondary_text_color !important
+        --yc-callout-red-badge: #ffe5eb !important
+        --yc-callout-red-bg: surface_color !important
+        --yc-callout-red-icon: #c1475c !important
+        --yc-callout-red-line: separator_color !important
+        --yc-callout-text: #465568 !important
+        --yc-callout-warn-badge: #fff0d4 !important
+        --yc-callout-warn-bg: surface_color !important
+        --yc-callout-warn-icon: #a76b10 !important
+        --yc-callout-warn-line: #eddec6 !important
+        --yc-callout-yellow-badge: #fff1be !important
+        --yc-callout-yellow-bg: #fffdf3 !important
+        --yc-callout-yellow-icon: #8b7415 !important
+        --yc-callout-yellow-line: #ece3bc !important
+        --yc-checkbox-line: separator_color !important
+        --yc-contest-scroll-hover: #829fbe !important
+        --yc-contest-scroll-thumb: #b5c7da !important
+        --yc-contest-scroll-track: inset_color !important
+        --yc-control-muted: #8494aa !important
+        --yc-control-scroll: #b8c9da !important
+        --yc-cover-ink: primary_text_color !important
+        --yc-cover-muted: secondary_text_color !important
+        --yc-danger-bg: #fff1f3 !important
+        --yc-danger-ink: #cf4353 !important
+        --yc-dialog-accent: #1677d2 !important
+        --yc-dialog-bg: surface_color !important
+        --yc-dialog-ink: primary_text_color !important
+        --yc-dialog-input: inset_color !important
+        --yc-dialog-line: separator_color !important
+        --yc-dialog-muted: #8493a6 !important
+        --yc-dialog-soft: raised_color !important
+        --yc-filter-border: separator_color !important
+        --yc-filter-hover-line: #b8cce0 !important
+        --yc-filter-ink: primary_text_color !important
+        --yc-filter-line: separator_color !important
+        --yc-filter-surface: surface_color !important
+        --yc-info-bg: surface_color !important
+        --yc-info-ink: primary_text_color !important
+        --yc-info-input: inset_color !important
+        --yc-info-line: separator_color !important
+        --yc-info-muted: secondary_text_color !important
+        --yc-info-option: raised_color !important
+        --yc-info-pill-bg: #edf3fa !important
+        --yc-info-pill-ink: #5f7590 !important
+        --yc-md-bar: #f1f3f5 !important
+        --yc-md-ink: primary_text_color !important
+        --yc-md-input: inset_color !important
+        --yc-md-line: separator_color !important
+        --yc-md-muted: #8494aa !important
+        --yc-md-scroll: #a8bdcb !important
+        --yc-md-scroll-hover: #91a9bc !important
+        --yc-msg-accent: #1677d2 !important
+        --yc-msg-bg: surface_color !important
+        --yc-msg-canvas: canvas_color !important
+        --yc-msg-line: separator_color !important
+        --yc-msg-muted: #7c8b9e !important
+        --yc-msg-soft: #e9f3ff !important
+        --yc-msg-text: primary_text_color !important
+        --yc-page-blue: #1678d7 !important
+        --yc-page-blue-soft: #e8f3ff !important
+        --yc-page-line: #dde6f0 !important
+        --yc-page-muted: #8494aa !important
+        --yc-page-soft: raised_color !important
+        --yc-placeholder-color: secondary_text_color !important
+        --yc-scroll-hover: #a6b4c5 !important
+        --yc-scroll-thumb: separator_color !important
+        --yc-side-accent: #1677d2 !important
+        --yc-side-bg: surface_color !important
+        --yc-side-ink: primary_text_color !important
+        --yc-side-line: separator_color !important
+        --yc-side-muted: secondary_text_color !important
+        --yc-side-selected: #eaf4ff !important
+        --yc-side-soft: raised_color !important
+    site-token-values-dark()
+        --article-blue: #69b1ff !important
+        --article-code: #252a30 !important
+        --article-ink: primary_text_color !important
+        --article-inline: #442d31 !important
+        --article-inline-ink: #ffaaa8 !important
+        --article-line: separator_color !important
+        --article-muted: secondary_text_color !important
+        --article-soft: #29343f !important
+        --article-title: primary_text_color !important
+        --auth-ink: primary_text_color !important
+        --auth-muted: secondary_text_color !important
+        --author-stats-bg: surface_color !important
+        --author-stats-ink: primary_text_color !important
+        --author-stats-line: separator_color !important
+        --author-stats-muted: secondary_text_color !important
+        --bulletin-bg: surface_color !important
+        --bulletin-blue: #8ec8ff !important
+        --bulletin-button: #344d66 !important
+        --bulletin-ink: primary_text_color !important
+        --bulletin-line: separator_color !important
+        --bulletin-muted: secondary_text_color !important
+        --bulletin-soft: raised_color !important
+        --ca-blue-soft: #344d66 !important
+        --ca-selected: #344d66 !important
+        --compose-bg: surface_color !important
+        --compose-input: inset_color !important
+        --compose-line: separator_color !important
+        --compose-option: raised_color !important
+        --contest-accent: #98ccff !important
+        --contest-accent-bg: #30475d !important
+        --contest-hover: hover_color !important
+        --contest-ink: primary_text_color !important
+        --contest-line: separator_color !important
+        --contest-muted: secondary_text_color !important
+        --contest-problem-alternate: alternate_color !important
+        --contest-problem-hover: #344d66 !important
+        --contest-raised: raised_color !important
+        --contest-success: #9ed6b8 !important
+        --contest-success-bg: #31483c !important
+        --contest-surface: surface_color !important
+        --contest-tab-active: #344d66 !important
+        --contest-tab-blue: #8ec8ff !important
+        --contest-tab-muted: secondary_text_color !important
+        --contest-tab-selected: #344d66 !important
+        --contest-tab-soft: raised_color !important
+        --contest-tab-surface: surface_color !important
+        --copy-accent: #8ec8ff !important
+        --copy-bg: surface_color !important
+        --copy-blue: #344d66 !important
+        --copy-ink: primary_text_color !important
+        --copy-input: inset_color !important
+        --copy-line: separator_color !important
+        --copy-muted: secondary_text_color !important
+        --copy-scroll: #617587 !important
+        --copy-soft: #363e48 !important
+        --course-border: separator_color !important
+        --course-muted: secondary_text_color !important
+        --course-surface: surface_color !important
+        --course-text: primary_text_color !important
+        --create-bg: surface_color !important
+        --create-input: inset_color !important
+        --create-line: separator_color !important
+        --create-option: raised_color !important
+        --detail-accepted-bg: #33483f !important
+        --detail-accepted-ink: #add7be !important
+        --detail-bg: surface_color !important
+        --detail-id: #9cc5f7 !important
+        --detail-ink: primary_text_color !important
+        --detail-line: separator_color !important
+        --detail-muted: secondary_text_color !important
+        --detail-rate-fill: #34c997 !important
+        --detail-rate-track: #48525d !important
+        --detail-record-bg: #504537 !important
+        --detail-record-ink: #e5c28e !important
+        --detail-stat-bg: #34465b !important
+        --detail-stat-ink: #bed6f1 !important
+        --detail-tag-bg: raised_color !important
+        --detail-tag-ink: primary_text_color !important
+        --discussion-active: #344d66 !important
+        --discussion-blue: #8ec8ff !important
+        --discussion-blue-soft: #344d66 !important
+        --discussion-hover: #344d66 !important
+        --discussion-ink: primary_text_color !important
+        --discussion-input: inset_color !important
+        --discussion-line: separator_color !important
+        --discussion-meta: secondary_text_color !important
+        --discussion-muted: secondary_text_color !important
+        --discussion-pending-action-bg: #8a6329 !important
+        --discussion-pending-action-ink: #ffe2a8 !important
+        --discussion-pending-bg: #4c3f29 !important
+        --discussion-pending-border: #d7a24a !important
+        --discussion-pending-ink: #edc77b !important
+        --discussion-pending-label-bg: #8a6329 !important
+        --discussion-pending-label-ink: #ffe2a8 !important
+        --discussion-pending-row: #3d3420 !important
+        --discussion-pending-row-hover: #3d3420 !important
+        --discussion-resubmit-action-bg: #2b5d85 !important
+        --discussion-resubmit-action-ink: #a8d8ff !important
+        --discussion-resubmit-bg: #344d66 !important
+        --discussion-resubmit-border: #4c92c9 !important
+        --discussion-resubmit-ink: #8ec8ff !important
+        --discussion-resubmit-label-bg: #2b5d85 !important
+        --discussion-resubmit-label-ink: #a8d8ff !important
+        --discussion-resubmit-row: #1c3347 !important
+        --discussion-resubmit-row-hover: #1c3347 !important
+        --discussion-soft: raised_color !important
+        --discussion-surface: surface_color !important
+        --file-dialog-accent: #8ec8ff !important
+        --file-dialog-bg: surface_color !important
+        --file-dialog-blue: #344d66 !important
+        --file-dialog-ink: primary_text_color !important
+        --file-dialog-input: inset_color !important
+        --file-dialog-line: separator_color !important
+        --file-dialog-muted: secondary_text_color !important
+        --file-dialog-red: #ff9eaa !important
+        --file-dialog-red-bg: #503b43 !important
+        --file-dialog-scroll: #617587 !important
+        --file-dialog-soft: raised_color !important
+        --foot-accent: #9bccf8 !important
+        --foot-bg: surface_color !important
+        --foot-control: #383d44 !important
+        --foot-hover: #344d66 !important
+        --foot-ink: primary_text_color !important
+        --foot-line: separator_color !important
+        --foot-muted: secondary_text_color !important
+        --hm-border: separator_color !important
+        --hm-muted: secondary_text_color !important
+        --home-blue: #8ec8ff !important
+        --home-hover: #344d66 !important
+        --home-ink: primary_text_color !important
+        --home-line: separator_color !important
+        --home-muted: secondary_text_color !important
+        --home-soft: raised_color !important
+        --home-surface: surface_color !important
+        --home-tile-hover-border: #567898 !important
+        --hw-blue: #8ec8ff !important
+        --hw-blue-soft: #344d66 !important
+        --hw-ended: #c1cbd7 !important
+        --hw-ended-soft: #3d434b !important
+        --hw-ink: primary_text_color !important
+        --hw-input: inset_color !important
+        --hw-line: separator_color !important
+        --hw-muted: secondary_text_color !important
+        --hw-panel: surface_color !important
+        --hw-row-hover: #344d66 !important
+        --hw-scroll: separator_color !important
+        --hw-soft: raised_color !important
+        --hw-success: #88d7b5 !important
+        --hw-success-soft: #304b41 !important
+        --hw-surface: surface_color !important
+        --hw-tab-selected: #344d66 !important
+        --hw-warn: #efc67d !important
+        --hw-warn-soft: #4a4131 !important
+        --list-alt: alternate_color !important
+        --list-bg: surface_color !important
+        --list-blue: #8ec8ff !important
+        --list-blue-soft: #344d66 !important
+        --list-head: raised_color !important
+        --list-hover: hover_color !important
+        --list-ink: primary_text_color !important
+        --list-input: inset_color !important
+        --list-line: separator_color !important
+        --list-muted: secondary_text_color !important
+        --list-rule-bg: #3b4654 !important
+        --list-rule-ink: primary_text_color !important
+        --list-scroll: separator_color !important
+        --list-soft: raised_color !important
+        --list-success: #88d7b5 !important
+        --list-success-soft: #304b41 !important
+        --list-surface: surface_color !important
+        --list-tag-bg: raised_color !important
+        --md-bk-color: surface_color !important
+        --md-bk-color-outstand: #333 !important
+        --md-bk-hover-color: hover_color !important
+        --md-border-active-color: hover_color !important
+        --md-border-color: separator_color !important
+        --md-border-hover-color: hover_color !important
+        --md-color: #999 !important
+        --md-hover-color: hover_color !important
+        --md-modal-mask: #00000073 !important
+        --md-scrollbar-bg-color: surface_color !important
+        --md-scrollbar-thumb-active-color: hover_color !important
+        --md-scrollbar-thumb-color: separator_color !important
+        --md-scrollbar-thumb-hover-color: hover_color !important
+        --md-theme-bg-color-scrollbar-thumb: surface_color !important
+        --md-theme-code-copy-tips-color: inset_color !important
+        --node-active: #344d66 !important
+        --node-blue: #8ec8ff !important
+        --picker-bg: surface_color !important
+        --picker-line: separator_color !important
+        --pl-alt: alternate_color !important
+        --pl-bg: surface_color !important
+        --pl-blue: #8ec8ff !important
+        --pl-blue-soft: #344d66 !important
+        --pl-fail: #f3a0aa !important
+        --pl-fail-soft: #50383d !important
+        --pl-head: raised_color !important
+        --pl-hover: #344d66 !important
+        --pl-line: separator_color !important
+        --pl-muted: secondary_text_color !important
+        --pl-scroll: separator_color !important
+        --pl-success: #88d7b5 !important
+        --pl-success-soft: #304b41 !important
+        --pl-tag-bg: #353e49 !important
+        --pl-tag-text: primary_text_color !important
+        --pl-text: primary_text_color !important
+        --rank-blue: #8ec8ff !important
+        --rank-blue-soft: #344d66 !important
+        --separator-border: separator_color !important
+        --sidebar-accent: #8ec8ff !important
+        --sidebar-accent-soft: #344d66 !important
+        --sidebar-bg: surface_color !important
+        --sidebar-ink: primary_text_color !important
+        --sidebar-line: separator_color !important
+        --sidebar-muted: secondary_text_color !important
+        --sidebar-scroll: #617587 !important
+        --sidebar-soft: raised_color !important
+        --state-ended-bg: #3d434b !important
+        --state-ended-ink: primary_text_color !important
+        --state-upcoming-bg: #433b5c !important
+        --state-upcoming-ink: #c8b8f4 !important
+        --statement-accent: #7bbaff !important
+        --statement-button: #354e68 !important
+        --statement-code: #2a323c !important
+        --statement-ink: primary_text_color !important
+        --statement-inline: raised_color !important
+        --statement-line: separator_color !important
+        --statement-muted: #9eafc3 !important
+        --statement-scroll: #617587 !important
+        --statement-scroll-hover: #7d94a8 !important
+        --statement-soft: raised_color !important
+        --statement-tab-active: #8ec8ff !important
+        --statement-tab-bg: #344d66 !important
+        --statement-tab-hover: hover_color !important
+        --statement-tab-ink: primary_text_color !important
+        --statement-tab-line: separator_color !important
+        --statement-title: primary_text_color !important
+        --submit-bg: surface_color !important
+        --submit-input: inset_color !important
+        --submit-line: separator_color !important
+        --workspace-bg: surface_color !important
+        --workspace-input: inset_color !important
+        --workspace-line: separator_color !important
+        --workspace-soft: raised_color !important
+        --yc-button-bg: #344353 !important
+        --yc-button-hover: #40536a !important
+        --yc-button-text: #c2d7ee !important
+        --yc-callout-note-badge: #30485e !important
+        --yc-callout-note-bg: surface_color !important
+        --yc-callout-note-icon: #8ec8ff !important
+        --yc-callout-note-line: secondary_text_color !important
+        --yc-callout-red-badge: #533841 !important
+        --yc-callout-red-bg: surface_color !important
+        --yc-callout-red-icon: #ff9eaa !important
+        --yc-callout-red-line: separator_color !important
+        --yc-callout-text: primary_text_color !important
+        --yc-callout-warn-badge: #51432f !important
+        --yc-callout-warn-bg: surface_color !important
+        --yc-callout-warn-icon: #f0c27a !important
+        --yc-callout-warn-line: #5e503c !important
+        --yc-callout-yellow-badge: #4d472d !important
+        --yc-callout-yellow-bg: surface_color !important
+        --yc-callout-yellow-icon: #e6d081 !important
+        --yc-callout-yellow-line: #5d573b !important
+        --yc-checkbox-line: separator_color !important
+        --yc-contest-scroll-hover: #819dbd !important
+        --yc-contest-scroll-thumb: #56677b !important
+        --yc-contest-scroll-track: inset_color !important
+        --yc-control-muted: secondary_text_color !important
+        --yc-control-scroll: separator_color !important
+        --yc-cover-ink: primary_text_color !important
+        --yc-cover-muted: #d0e5f5 !important
+        --yc-danger-bg: #503b43 !important
+        --yc-danger-ink: #ff9eaa !important
+        --yc-dialog-accent: #8ec8ff !important
+        --yc-dialog-bg: surface_color !important
+        --yc-dialog-ink: primary_text_color !important
+        --yc-dialog-input: inset_color !important
+        --yc-dialog-line: separator_color !important
+        --yc-dialog-muted: secondary_text_color !important
+        --yc-dialog-soft: raised_color !important
+        --yc-filter-border: separator_color !important
+        --yc-filter-hover-line: #6a7b8c !important
+        --yc-filter-ink: primary_text_color !important
+        --yc-filter-line: separator_color !important
+        --yc-filter-surface: surface_color !important
+        --yc-info-bg: surface_color !important
+        --yc-info-ink: primary_text_color !important
+        --yc-info-input: raised_color !important
+        --yc-info-line: separator_color !important
+        --yc-info-muted: secondary_text_color !important
+        --yc-info-option: raised_color !important
+        --yc-info-pill-bg: raised_color !important
+        --yc-info-pill-ink: #c2d7ee !important
+        --yc-md-ink: primary_text_color !important
+        --yc-md-input: inset_color !important
+        --yc-md-line: separator_color !important
+        --yc-md-muted: secondary_text_color !important
+        --yc-md-scroll: #617587 !important
+        --yc-md-scroll-hover: #7d94a8 !important
+        --yc-msg-accent: #8ec8ff !important
+        --yc-msg-bg: surface_color !important
+        --yc-msg-canvas: inset_color !important
+        --yc-msg-line: separator_color !important
+        --yc-msg-muted: secondary_text_color !important
+        --yc-msg-soft: #344d66 !important
+        --yc-msg-text: primary_text_color !important
+        --yc-nav-accent: #8ec8ff !important
+        --yc-nav-active: #344d66 !important
+        --yc-nav-bg: surface_color !important
+        --yc-nav-hover: hover_color !important
+        --yc-nav-line: separator_color !important
+        --yc-nav-muted: secondary_text_color !important
+        --yc-nav-text: primary_text_color !important
+        --yc-page-blue: #8ec8ff !important
+        --yc-page-blue-soft: #344d66 !important
+        --yc-page-line: canvas_color !important
+        --yc-page-muted: #a1adbc !important
+        --yc-page-soft: raised_color !important
+        --yc-placeholder-color: secondary_text_color !important
+        --yc-scroll-hover: #8090a5 !important
+        --yc-scroll-thumb: #657387 !important
+        --yc-side-accent: #8ec8ff !important
+        --yc-side-bg: surface_color !important
+        --yc-side-ink: primary_text_color !important
+        --yc-side-line: separator_color !important
+        --yc-side-muted: secondary_text_color !important
+        --yc-side-selected: #344d66 !important
+        --yc-side-soft: raised_color !important
+    html, body, body *
+        if dark-mode
+            site-token-values-dark()
+        else
+            site-token-values-light()
+        // 站点共享调色板本身（新版组件通过 var(--yc-dark-*) 取值）
+        --yc-dark-page: canvas_color !important
+        --yc-dark-surface: surface_color !important
+        --yc-dark-raised: raised_color !important
+        --yc-dark-inset: inset_color !important
+        --yc-dark-alternate: alternate_color !important
+        --yc-dark-hover: hover_color !important
+        --yc-dark-line: separator_color !important
+        --yc-dark-text: primary_text_color !important
+        --yc-dark-muted: secondary_text_color !important
+
+    //! 站点组件的硬编码颜色 -----------------------------------------
+
+    // 站点另有一批新版组件没有走 CSS 变量，而是自己写死了浅色值，再在深色
+    // 模式下换另一套写死的深色值。脚本不依赖站点的主题开关，所以这里把站点
+    // 深色模式那一套直接写进来：中性色映射到本主题调色板，状态色与强调色沿用
+    // 站点取值。站点改版后可以用仓库 tools 目录里的脚本重新生成这一段。
+    if dark-mode
+        // @site-dark-rules-begin
+        #panel .yc-contest-page .yc-contest-state.is-ended
+            background rgb(61, 67, 75) !important
+            color rgb(193, 203, 215) !important
+        #panel .yc-contest-page .yc-contest-state.is-new
+            background rgb(52, 77, 102) !important
+            color rgb(142, 200, 255) !important
+        #panel .yc-contest-page .yc-contest-state.is-ongoing
+            background rgb(48, 75, 65) !important
+            color rgb(136, 215, 181) !important
+        #panel .yc-contest-page .yc-contest-state.is-upcoming
+            background rgb(67, 59, 92) !important
+            color rgb(200, 184, 244) !important
+        #panel .yc-discussion-index:not(.discussion-blog-page) .discussion-review-btn
+            background linear-gradient(rgb(214, 171, 58), rgb(168, 121, 22)) !important
+            color rgb(33, 22, 0) !important
+        #panel .yc-discussion-index:not(.discussion-blog-page) .discussion-review-btn:hover
+            background linear-gradient(rgb(214, 171, 58), rgb(168, 121, 22)) !important
+            box-shadow rgba(0, 0, 0, 0.28) 0px 7px 16px !important
+            color rgb(33, 22, 0) !important
+        #panel .yc-discussion-index:not(.discussion-blog-page) .discussion-sidebar-card .discussion-actions
+            border-color separator_color !important
+        #panel .yc-domain-bulletin-card
+            border-color separator_color !important
+        #panel .yc-home-tag--ended
+            background rgb(61, 67, 75) !important
+            color rgb(193, 203, 215) !important
+        #panel .yc-home-tag--extended
+            background rgb(74, 65, 49) !important
+            color rgb(239, 198, 125) !important
+        #panel .yc-home-tag--new
+            background rgb(52, 77, 102) !important
+            color rgb(142, 200, 255) !important
+        #panel .yc-home-tag--ongoing
+            background rgb(48, 75, 65) !important
+            color rgb(136, 215, 181) !important
+        #panel .yc-home-tag--upcoming
+            background rgb(67, 59, 92) !important
+            color rgb(200, 184, 244) !important
+        #panel .yc-problem-list .ac-rate-bar
+            background rgb(89, 126, 170) !important
+        #panel .yc-problem-list .ac-rate-bar-container
+            background rgb(45, 58, 75) !important
+        #panel .yc-problem-list .ac-rate-text
+            color rgb(212, 229, 250) !important
+        .autocomplete-list
+            background-color surface_color !important
+        .autocomplete-list li[aria-selected="true"]
+            background-color surface_color !important
+        .autocomplete-list li[data-focus="true"]
+            background-color rgb(16, 24, 41) !important
+        .autocomplete-wrapper
+            border-color separator_color !important
+            background-color surface_color !important
+        .autocomplete-wrapper input
+            background-color surface_color !important
+            color primary_text_color !important
+        .blog-square-back
+            background raised_color !important
+            color primary_text_color !important
+        .blog-square-back, .yc-discussion-meta
+            color rgb(174, 181, 189) !important
+        .blog-square-back:hover
+            color rgb(105, 177, 255) !important
+        .checkbox input
+            border-color separator_color !important
+        .col--ac-tried
+            border-left-color separator_color !important
+        .col--status, .col--submit-by, .col--lang, .col--case
+            border-right-color separator_color !important
+        .course-main-yc .course-yc-table tbody tr:hover
+            background rgb(38, 62, 82) !important
+        .course-main-yc .course-yc-table td
+            border-color rgb(58, 65, 73) !important
+        .course-main-yc .course-yc-table th
+            background rgb(38, 43, 49) !important
+            color rgb(168, 181, 194) !important
+            border-color rgb(66, 74, 84) !important
+        .course-main-yc .cw-badge--doing
+            background rgb(32, 66, 95) !important
+            color rgb(158, 211, 255) !important
+        .course-main-yc .cw-badge--done
+            background rgb(39, 73, 56) !important
+            color rgb(141, 213, 170) !important
+        .course-main-yc .cw-badge--todo
+            background rgb(58, 65, 73) !important
+            color rgb(181, 190, 200) !important
+        .course-main-yc .cw-name a
+            color rgb(224, 230, 236) !important
+        .course-main-yc .cw-num-val
+            color rgb(224, 230, 236) !important
+        .course-main-yc .cw-prog
+            color rgb(158, 211, 255) !important
+        .course-main-yc .cw-time
+            color rgb(155, 168, 181) !important
+        .course-main-yc .homework__item:hover
+            border-color rgb(75, 117, 149) !important
+            box-shadow rgba(0, 0, 0, 0.18) 0px 6px 14px !important
+        .course-main-yc .homework__progress
+            background rgb(58, 70, 82) !important
+        .course-main-yc .homework__status--completed
+            background rgb(39, 73, 56) !important
+            color rgb(141, 213, 170) !important
+        .course-main-yc .homework__status--in-progress
+            background rgb(32, 66, 95) !important
+            color rgb(158, 211, 255) !important
+        .course-main-yc .homework__status--not-started
+            background rgb(58, 65, 73) !important
+            color rgb(181, 190, 200) !important
+        .course-main-yc .section, .course-main-yc .tab-layout, .course-main-yc .section__body, .course-main-yc .tab-content, .course-main-yc .homework__item
+            border-color rgb(66, 74, 84) !important
+        .course-main-yc .section__header
+            border-color rgb(66, 74, 84) !important
+            background linear-gradient(100deg, rgb(48, 54, 61), rgb(43, 48, 54)) !important
+        .course-main-yc .section__tab-archive-toggle
+            border-color rgb(66, 74, 84) !important
+            color rgb(152, 164, 176) !important
+        .course-main-yc .section__tab-count
+            background rgb(49, 75, 98) !important
+            color rgb(174, 218, 255) !important
+        .course-main-yc .section__tab-group
+            color rgb(107, 122, 140) !important
+            border-top-color rgb(66, 74, 84) !important
+        .course-main-yc .section__tab-item
+            color rgb(172, 183, 195) !important
+        .course-main-yc .section__tab-item.active
+            background rgb(32, 66, 95) !important
+            color rgb(185, 224, 255) !important
+        .course-main-yc .section__tab-item.active .section__tab-count
+            background rgb(58, 143, 213) !important
+            color primary_text_color !important
+        .course-main-yc .section__tab-item:hover
+            background rgb(38, 62, 82) !important
+            color rgb(158, 211, 255) !important
+        .course-main-yc .section__title, .course-main-yc .homework__title
+            color primary_text_color !important
+        .course-main-yc .supplementary.list
+            color rgb(155, 168, 181) !important
+        .course-main-yc .supplementary.list > li:first-child
+            color rgb(145, 202, 255) !important
+        .course-main-yc .vertical-tabs
+            border-color rgb(66, 74, 84) !important
+            background rgb(38, 43, 49) !important
+        .data-table thead > tr
+            border-bottom-color separator_color !important
+        .dczcomments__item, .dczcomments__reply
+            border-top-color separator_color !important
+        .dialog
+            background-color rgba(surface_color, 0.6) !important
+        .dialog--signin__main
+            background-color surface_color !important
+            box-shadow rgba(255, 255, 255, 0.6) 0px 0px 30px !important
+        .dialog.withBg .dialog__content
+            background-color surface_color !important
+            border separator_color !important
+            box-shadow rgba(255, 255, 255, 0.2) 0px 0.125rem 0.625rem !important
+        .discussion-blog-profile .profile__bg
+            background linear-gradient(135deg, rgb(28, 53, 111), rgb(89, 100, 175)) !important
+        .discussion-blog-signature
+            color rgb(174, 181, 189) !important
+        .discussion-comments .dczcomments__operations a, .discussion-comments .dczcomments__operations a .icon
+            color rgb(138, 146, 156) !important
+        .discussion-comments .dczcomments__operations a:hover, .discussion-comments .dczcomments__operations a:hover .icon
+            color rgb(158, 211, 255) !important
+        .discussion-comments__header
+            border-color separator_color !important
+        .discussion-comments__header .section__title
+            color primary_text_color !important
+        .discussion-comments__header .section__title::before
+            background rgb(158, 211, 255) !important
+        .discussion-markdown-host .dczcomments__box [name="dczcomments__box__cancel"]
+            background raised_color !important
+            color primary_text_color !important
+        .discussion-markdown-host .dczcomments__box [name="dczcomments__box__cancel"]:hover
+            background raised_color !important
+        .discussion-markdown-host .dczcomments__box__submit
+            background rgb(39, 73, 56) !important
+            color rgb(141, 213, 170) !important
+        .discussion-markdown-host .dczcomments__box__submit:hover
+            background rgb(48, 87, 66) !important
+        .discussion-panel__header h1, .yc-discussion-title a, .sidebar-user-stat .numbox__num
+            color primary_text_color !important
+        .discussion-resubmit-icon
+            background rgb(158, 211, 255) !important
+            color rgb(40, 125, 204) !important
+        .discussion-resubmit-input
+            border-color rgb(80, 86, 93) !important
+            background raised_color !important
+            color primary_text_color !important
+        .discussion-resubmit-input::placeholder
+            color primary_text_color !important
+        .discussion-topic .topic__content
+            color rgb(215, 220, 226) !important
+        .discussion-topic .topic__content :not(pre) > code
+            background rgb(68, 45, 49) !important
+            color rgb(255, 170, 168) !important
+        .discussion-topic .topic__content blockquote
+            background rgb(41, 52, 63) !important
+            color rgb(200, 214, 227) !important
+        .discussion-topic .topic__content div.code-toolbar > .toolbar .toolbar-item > a
+            background rgb(50, 72, 92) !important
+            color rgb(158, 211, 255) !important
+        .discussion-topic .topic__content h1, .discussion-topic .topic__content h2, .discussion-topic .topic__content h3, .discussion-topic .topic__content h4
+            color primary_text_color !important
+        .discussion-topic .topic__content h3
+            border-color rgb(69, 76, 84) !important
+        .discussion-topic .topic__content h4
+            background linear-gradient(90deg, rgb(41, 61, 80) 0%, rgba(41, 61, 80, 0) 72%) !important
+        .discussion-topic .topic__content hr
+            background linear-gradient(90deg, transparent 0%, rgba(166, 179, 192, 0.14) 10%, rgba(166, 179, 192, 0.58) 50%, rgba(166, 179, 192, 0.14) 90%, transparent 100%) !important
+        .discussion-topic .topic__content pre
+            border-color rgb(69, 76, 84) !important
+            background rgb(37, 42, 48) !important
+        .discussion-topic .topic__content pre::-webkit-scrollbar-thumb
+            background rgb(116, 136, 151) !important
+        .discussion-topic .topic__content pre::-webkit-scrollbar-track
+            background rgb(37, 42, 48) !important
+        .discussion-topic .topic__content table
+            border-color rgb(80, 91, 102) !important
+            background rgb(43, 48, 54) !important
+        .discussion-topic .topic__content table, .discussion-topic .topic__content th, .discussion-topic .topic__content td
+            border-color rgb(80, 91, 102) !important
+        .discussion-topic .topic__content tbody tr:nth-child(2n)
+            background rgb(43, 48, 54) !important
+        .discussion-topic .topic__content th
+            background rgb(48, 54, 61) !important
+            color primary_text_color !important
+        .discussion-topic .topic__content th, .discussion-topic .topic__content td
+            border-color rgb(80, 91, 102) !important
+        .discussion-topic .topic__content ul > li::marker
+            color rgb(105, 177, 255) !important
+        .discussion-topic__actions
+            background raised_color !important
+        .discussion-topic__actions .discussion-resubmit-btn
+            background rgb(48, 86, 115) !important
+            color rgb(158, 211, 255) !important
+        .discussion-topic__actions .discussion-resubmit-btn:hover
+            box-shadow rgba(0, 0, 0, 0.2) 0px 2px 6px !important
+            background rgb(48, 86, 115) !important
+            color rgb(158, 211, 255) !important
+        .discussion-topic__actions a, .discussion-topic__actions button, .discussion-topic__metric
+            color rgb(174, 182, 191) !important
+        .discussion-topic__actions a:hover, .discussion-topic__actions button:hover
+            background rgb(48, 86, 115) !important
+            color rgb(158, 211, 255) !important
+        .discussion-topic__actions button.activated
+            background rgb(48, 86, 115) !important
+            color rgb(158, 211, 255) !important
+        .discussion-topic__header, .discussion-topic__actions
+            border-color rgb(65, 70, 76) !important
+        .discussion-topic__node
+            background rgb(48, 86, 115) !important
+            color rgb(158, 211, 255) !important
+        .discussion-topic__node:hover
+            box-shadow rgba(0, 0, 0, 0.2) 0px 2px 6px !important
+            background rgb(48, 86, 115) !important
+            color rgb(158, 211, 255) !important
+        .discussion-topic__title-row h1
+            color primary_text_color !important
+        .dropdown .menu
+            box-shadow rgb(61, 61, 61) 0px 0.125rem 0.4375rem !important
+            background-color surface_color !important
+        .footer
+            background-color raised_color !important
+            color primary_text_color !important
+        .footer__category
+            border-bottom-color separator_color !important
+        .hasjs .collapsed #status:not([data-status="7"]) .compiler-text-mask
+            background-image linear-gradient(transparent, rgb(0, 0, 0) 25px) !important
+        .homepage-checkin
+            border-color separator_color !important
+        .homepage-checkin__body
+            background raised_color !important
+        .homepage-checkin__button.is-checked, .homepage-checkin__button:disabled
+            background rgb(53, 75, 98) !important
+            color rgb(169, 209, 244) !important
+        .homepage-checkin__fortune > strong.is-unlucky
+            color rgb(239, 146, 152) !important
+        .homepage-checkin__fortune h2 span
+            color rgb(120, 183, 241) !important
+        .homepage-checkin__fortune, .homepage-checkin__countdowns
+            border-color separator_color !important
+        .homepage-checkin__fortune-column
+            background raised_color !important
+            color rgb(200, 205, 211) !important
+        .homepage-checkin__stats b, .homepage-checkin__countdowns h2, .homepage-checkin__fortune h2
+            color rgb(169, 209, 244) !important
+        .homepage-checkin__stats, .homepage-checkin__countdown-item
+            color primary_text_color !important
+        .homepage-checkin__welcome
+            color primary_text_color !important
+        .homepage-checkin__welcome span, .homepage-checkin__date, .homepage-checkin__countdown-item em
+            color rgb(120, 183, 241) !important
+        .homepage-study-heatmap
+            border-color rgb(54, 89, 72) !important
+            background rgb(32, 44, 37) !important
+            box-shadow rgba(0, 0, 0, 0.2) 0px 8px 20px !important
+        .homepage-study-heatmap .level-1
+            background rgb(39, 109, 69) !important
+        .homepage-study-heatmap .level-2
+            background rgb(52, 147, 89) !important
+        .homepage-study-heatmap .level-3
+            background rgb(79, 189, 120) !important
+        .homepage-study-heatmap .level-4
+            background rgb(133, 223, 163) !important
+        .homepage-study-heatmap__cell, .homepage-study-heatmap__legend i
+            background rgb(49, 70, 58) !important
+        .homepage-study-heatmap__header
+            border-color rgb(54, 89, 72) !important
+            background linear-gradient(110deg, rgb(38, 56, 45), rgb(29, 41, 34)) !important
+        .homepage-study-heatmap__summary, .homepage-study-heatmap__legend
+            color rgb(166, 188, 174) !important
+        .homepage-study-heatmap__title
+            color rgb(220, 239, 226) !important
+        .menu__link
+            color primary_text_color !important
+        .menu__link.highlight
+            background rgb(40, 11, 20) !important
+        .menu__seperator
+            border-top-color separator_color !important
+        .messagepad__input
+            border-top-color separator_color !important
+        .messagepad__list-item.active
+            border-color rgb(237, 95, 130) !important
+            background-color rgba(237, 95, 130, 0.07) !important
+        .messagepad__list-item:hover
+            border-color separator_color !important
+            background-color surface_color !important
+        .messagepad__sidebar
+            border-right-color separator_color !important
+        .nav
+            background-color raised_color !important
+        .nav .nav__item
+            color primary_text_color !important
+        .nav .nav__item:hover
+            background-color raised_color !important
+        .nav--shadow
+            box-shadow rgba(0, 0, 0, 0.18) 0px 3px 14px !important
+        .omnibar-main
+            color primary_text_color !important
+        .omnibar-main input, .omnibar-main .omnibar-content-section
+            background-color surface_color !important
+            border-color separator_color !important
+        .omnibar-toggle
+            background-color surface_color !important
+            color primary_text_color !important
+        .page--contest_scoreboard .star-highlight
+            background rgb(111, 117, 123) !important
+        .page--home_messages .dialog.withBg:has(.autocomplete-container)
+            background rgba(surface_color, 0.55) !important
+        .page--record_detail .subtask
+            background-color surface_color !important
+        .pager.pager-bottom, .pager.pager-bottom .pager__item
+            border-top-color separator_color !important
+        .pager.pager-top, .pager.pager-top .pager__item
+            border-bottom-color separator_color !important
+        .problem__tag-item
+            color rgb(216, 222, 227) !important
+        .problem__tag-link
+            background-color surface_color !important
+            color primary_text_color !important
+        .profile-heatmap-calendar__cell, .profile-heatmap-card__legend i
+            background raised_color !important
+        .profile-heatmap-calendar__cell.level-1, .profile-heatmap-card__legend .level-1
+            background rgb(39, 112, 71) !important
+        .profile-heatmap-calendar__cell.level-2, .profile-heatmap-card__legend .level-2
+            background rgb(50, 147, 91) !important
+        .profile-heatmap-calendar__cell.level-3, .profile-heatmap-card__legend .level-3
+            background rgb(67, 185, 110) !important
+        .profile-heatmap-calendar__cell.level-4, .profile-heatmap-card__legend .level-4
+            background rgb(123, 221, 153) !important
+        .profile-heatmap-card
+            border-color separator_color !important
+            background raised_color !important
+        .profile-heatmap-card__caption, .profile-heatmap-calendar__days, .profile-heatmap-calendar__months, .profile-heatmap-stat__label, .profile-heatmap-card__legend
+            color primary_text_color !important
+        .profile-heatmap-card__select
+            border-color separator_color !important
+            background surface_color !important
+            color primary_text_color !important
+        .profile-heatmap-stat__unit
+            color primary_text_color !important
+        .profile-heatmap-stat__value
+            color primary_text_color !important
+        .profile-heatmap-stats
+            border-color separator_color !important
+        .scratchpad-container
+            background-color surface_color !important
+        .scratchpad__data-input
+            border-left-color separator_color !important
+            background-color surface_color !important
+            color primary_text_color !important
+        .scratchpad__data-input:focus
+            background surface_color !important
+            border-color rgb(28, 45, 64) !important
+        .scratchpad__toolbar
+            background-color surface_color !important
+        .scratchpad__toolbar__button.enabled:hover
+            color rgb(138, 148, 165) !important
+            background-color surface_color !important
+        .scratchpad__toolbar__split
+            background-color raised_color !important
+        .search > input
+            border-color separator_color !important
+            color primary_text_color !important
+        .search-sort
+            color primary_text_color !important
+            background-color surface_color !important
+        .section__footer
+            border-top-color separator_color !important
+        .section__list__item
+            border-bottom-color separator_color !important
+        .section__tab-container.immersive .section__tab-header-item.selected
+            background-color surface_color !important
+            color primary_text_color !important
+            box-shadow rgba(255, 255, 255, 0.3) 0px 0px 10px !important
+        .section__tab-header-item
+            color rgb(216, 224, 230) !important
+        .section__tab-header-item:hover
+            background-color surface_color !important
+        .section__table-header
+            background-color rgba(surface_color, 0.95) !important
+            box-shadow rgba(255, 255, 255, 0.03) 0px 0.1875rem 0.125rem !important
+        .section__title
+            color primary_text_color !important
+        .select
+            border separator_color !important
+            background-color surface_color !important
+        .select:focus
+            border-color rgb(41, 96, 160) !important
+            outline-color rgb(16, 47, 78) !important
+        .sessionlist__item
+            border-bottom-color separator_color !important
+        .sidebar-user-profile .user-profile-name
+            color primary_text_color !important
+        .token.atrule, .token.keyword, .token.attr-value, .language-autohotkey .token.selector, .language-json .token.boolean, .language-json .token.number, code[class*="language-css"]
+            color rgb(86, 156, 214) !important
+        .token.attr-name, .token.property, .token.regex, .token.entity
+            color rgb(209, 105, 105) !important
+        .token.class-name, .language-json .token.property
+            color rgb(78, 201, 176) !important
+        .token.comment, .token.prolog, .token.doctype, .token.cdata
+            color rgb(87, 166, 74) !important
+        .token.deleted, .language-autohotkey .token.tag
+            color rgb(154, 5, 15) !important
+        .token.directive.tag .tag
+            background rgb(255, 255, 0) !important
+            color secondary_text_color !important
+        .token.function
+            color primary_text_color !important
+        .token.important
+            color rgb(238, 153, 0) !important
+        .token.punctuation, .token.operator
+            color primary_text_color !important
+        .token.selector, .language-autohotkey .token.keyword
+            color rgb(0, 0, 159) !important
+        .token.string
+            color rgb(214, 157, 133) !important
+        .token.tag, .token.selector
+            color rgb(215, 186, 125) !important
+        .token.url, .token.symbol, .token.number, .token.boolean, .token.variable, .token.constant, .token.inserted
+            color rgb(181, 206, 168) !important
+        .toolbar
+            background-color rgba(surface_color, 0.8) !important
+        .tooltip.drop-element .drop-content
+            background rgb(48, 86, 115) !important
+            color rgb(158, 211, 255) !important
+            box-shadow rgba(0, 0, 0, 0.25) 0px 4px 12px !important
+        .tooltip.drop-element-attached-bottom .drop-content::before
+            border-top-color rgb(48, 86, 115) !important
+        .tooltip.drop-element-attached-top .drop-content::before
+            border-bottom-color rgb(48, 86, 115) !important
+        .typo a:not(.user-profile-name):not(.media-link), .typo .link:not(.user-profile-name):not(.media-link), .typo-a:not(.user-profile-name):not(.media-link), .typo a:visited:not(.user-profile-name):not(.media-link), .typo .link:visited:not(.user-profile-name):not(.media-link), .typo-a:visited:not(.user-profile-name):not(.media-link), .typo a:active:not(.user-profile-name):not(.media-link), .typo .link:active:not(.user-profile-name):not(.media-link), .typo-a:active:not(.user-profile-name):not(.media-link), .typo a:hover:not(.user-profile-name):not(.media-link), .typo .link:hover:not(.user-profile-name):not(.media-link), .typo-a:hover:not(.user-profile-name):not(.media-link)
+            color rgb(85, 182, 226) !important
+        .typo table th, .typo table td, .typo table caption
+            border-color separator_color !important
+            color primary_text_color !important
+        .typo table thead th
+            background surface_color !important
+        .user-profile-avatar
+            border-color separator_color !important
+        .widget--category-filter__drop
+            background-color surface_color !important
+            box-shadow rgba(255, 255, 255, 0.3) 0px 0.125rem 0.4375rem !important
+        .yc-category-chip
+            background rgb(128, 102, 255) !important
+            color primary_text_color !important
+        .yc-category-close
+            color primary_text_color !important
+        .yc-category-custom input
+            border-color separator_color !important
+            background raised_color !important
+            color primary_text_color !important
+        .yc-category-dialog
+            border-color separator_color !important
+            background raised_color !important
+            color primary_text_color !important
+        .yc-category-dialog .yc-problem-category
+            background rgb(66, 70, 78) !important
+            color rgb(199, 207, 218) !important
+        .yc-category-dialog .yc-problem-category.is-selected
+            background rgb(128, 102, 255) !important
+            color primary_text_color !important
+        .yc-category-dialog .yc-problem-category.is-selected:is(:hover, :focus-visible)
+            background rgb(140, 118, 255) !important
+            color primary_text_color !important
+        .yc-category-dialog .yc-problem-category:hover
+            background rgb(75, 81, 92) !important
+            color primary_text_color !important
+        .yc-category-dialog :is(.yc-category-draft, .yc-category-group, .yc-category-dialog-footer)
+            border-color separator_color !important
+        .yc-category-dialog-tools input
+            border-color separator_color !important
+            background raised_color !important
+            color primary_text_color !important
+        .yc-category-group h3
+            color primary_text_color !important
+        .yc-contest-section-header
+            border-color separator_color !important
+            background raised_color !important
+        .yc-discussion-item
+            border-color separator_color !important
+        .yc-discussion-item:hover
+            background rgb(43, 61, 82) !important
+        .yc-discussion-item:hover .yc-discussion-title a
+            color rgb(105, 177, 255) !important
+        .yc-filter-label, .yc-filter-option
+            color primary_text_color !important
+        .yc-filter-menu
+            border-color separator_color !important
+            box-shadow rgba(0, 0, 0, 0.25) 0px 8px 24px !important
+        .yc-filter-option.is-selected
+            color rgb(184, 220, 255) !important
+        .yc-filter-option:hover
+            background raised_color !important
+        .yc-filter-selected
+            border-color separator_color !important
+        .yc-homework .yc-hw-create-header .yc-hw-symbol
+            background rgb(41, 71, 95) !important
+            color rgb(158, 211, 255) !important
+        .yc-homework .yc-hw-create-header h1
+            color primary_text_color !important
+        .yc-homework .yc-hw-create-header p
+            color rgb(153, 161, 170) !important
+        .yc-info-stats a
+            color rgb(123, 186, 255) !important
+        .yc-node-group
+            background rgb(38, 58, 74) !important
+        .yc-node-group h3
+            color primary_text_color !important
+        .yc-node-group--green
+            background rgb(38, 61, 52) !important
+        .yc-node-group--orange
+            background rgb(73, 52, 38) !important
+        .yc-node-group--orange .yc-node-group__icon
+            background rgba(245, 124, 32, 0.17) !important
+            color rgb(255, 154, 82) !important
+        .yc-node-group--purple
+            background rgb(56, 47, 73) !important
+        .yc-node-group--red
+            background rgb(69, 47, 52) !important
+        .yc-node-group--yellow
+            background rgb(69, 64, 38) !important
+        .yc-node-group--yellow .yc-node-group__icon
+            background rgba(234, 179, 8, 0.16) !important
+            color rgb(242, 201, 76) !important
+        .yc-node-header
+            border-color separator_color !important
+        .yc-node-header h2
+            color primary_text_color !important
+        .yc-node-header p
+            color rgb(146, 152, 159) !important
+        .yc-node-header::after
+            background linear-gradient(90deg, transparent 0%, rgba(105, 177, 255, 0.16) 18%, rgba(105, 177, 255, 0.58) 50%, rgba(105, 177, 255, 0.16) 82%, transparent 100%) !important
+        .yc-node-link
+            background rgba(raised_color, 0.06) !important
+            color rgb(199, 205, 212) !important
+        .yc-node-link.is-active
+            background raised_color !important
+            box-shadow rgba(0, 0, 0, 0.2) 0px 2px 6px !important
+            color rgb(22, 119, 210) !important
+        .yc-node-link:hover
+            background rgba(raised_color, 0.11) !important
+            color primary_text_color !important
+        .yc-problem-action--danger
+            color rgb(255, 137, 145) !important
+        .yc-problem-action--primary
+            background rgb(24, 144, 255) !important
+            color primary_text_color !important
+        .yc-problem-action--primary:not(summary):is(:hover, :focus-visible)
+            background rgb(8, 126, 229) !important
+            color primary_text_color !important
+        .yc-problem-bulk
+            color rgb(193, 203, 217) !important
+            border-color rgb(68, 73, 87) !important
+            background raised_color !important
+        .yc-problem-bulk .yc-problem-action--danger
+            background rgb(83, 63, 74) !important
+            color rgb(244, 189, 204) !important
+        .yc-problem-bulk .yc-problem-action--danger:is(:hover, :focus-visible, :active)
+            background rgb(103, 70, 85) !important
+            color rgb(255, 208, 223) !important
+        .yc-problem-create-menu a
+            color primary_text_color !important
+        .yc-problem-filters, .yc-filter-menu
+            background raised_color !important
+        .yc-problem-list .yc-problem-description
+            color rgb(161, 173, 188) !important
+        .yc-problem-list .yc-problem-heading h1
+            color rgb(224, 230, 238) !important
+        .yc-problem-list .yc-problem-heading-icon
+            background rgb(52, 77, 102) !important
+            color rgb(142, 200, 255) !important
+        .yc-problem-list .yc-problem-title .problem_stat
+            color rgb(161, 173, 188) !important
+        .yc-problem-overview .yc-problem-nav-track > a.active:hover
+            color primary_text_color !important
+        .yc-problem-overview .yc-problem-nav-track > a.fail
+            color rgb(225, 172, 164) !important
+        .yc-problem-overview .yc-problem-nav-track > a:hover
+            color rgb(197, 218, 244) !important
+        .yc-problem-toolbar
+            border-color separator_color !important
+            background rgb(53, 59, 68) !important
+        .yc-problem-toolbar .yc-problem-filters
+            border-top-color separator_color !important
+        .yc-profile-content .section__tab-container.immersive .section__tab-header-item
+            color rgb(198, 208, 220) !important
+        .yc-profile-content .section__tab-container.immersive .section__tab-header-item.selected
+            color rgb(167, 208, 255) !important
+        .yc-profile-content .section__tab-container.immersive .section__tab-header-item:hover
+            color rgb(167, 208, 255) !important
+        .yc-profile-content .section__tab-header
+            border-color rgb(69, 78, 89) !important
+        .yc-profile-cover::before
+            background rgba(8, 14, 23, 0.52) !important
+        .yc-profile-metric
+            border-color rgba(151, 169, 191, 0.4) !important
+            background rgba(40, 49, 61, 0.82) !important
+        .yc-profile-metric__label
+            color primary_text_color !important
+        .yc-profile-metric__value
+            color rgb(142, 194, 255) !important
+        .yc-profile-metrics
+            border-color rgba(151, 169, 191, 0.32) !important
+        .yc-profile-shell
+            border-color rgb(69, 78, 89) !important
+        .yc-profile-tag-insight-group + .yc-profile-tag-insight-group
+            border-color separator_color !important
+        .yc-profile-tag-insight-group__title
+            color rgb(184, 197, 213) !important
+        .yc-profile-tag-insight__caption, .yc-profile-tag-insight__hint
+            color rgb(170, 183, 199) !important
+        .yc-profile-tag-insight__item
+            color rgb(194, 206, 222) !important
+        .yc-profile-tag-insight__item:hover, .yc-profile-tag-insight__item:focus
+            background rgba(raised_color, 0.08) !important
+        .yc-profile-tag-insight__track
+            stroke rgb(62, 72, 86) !important
+        .yc-profile-tags .section__title, .yc-profile-tag-insight__center
+            color rgb(226, 236, 248) !important
+        :is(#menu-footer-lang, #menu-footer-theme)
+            border-color rgb(69, 75, 83) !important
+            background raised_color !important
+            box-shadow rgba(0, 0, 0, 0.2) 0px 8px 28px !important
+        :is(#menu-footer-lang, #menu-footer-theme) .menu__link
+            color rgb(192, 203, 214) !important
+        :is(#menu-footer-lang, #menu-footer-theme) .menu__link:hover
+            background rgb(52, 77, 102) !important
+            color rgb(155, 204, 248) !important
+        :is(.yc-problem-bulk, .yc-problem-create-menu)
+            border-color separator_color !important
+            background raised_color !important
+        :is(:is(.problem-content, .yc-contest-description, .yc-homework-description, .yc-admin-clarifications, .clarification-container) .richmedia, .md-editor-preview) .token:is(.comment, .prolog, .doctype, .cdata)
+            color rgb(145, 163, 184) !important
+        :is(:is(.problem-content, .yc-contest-description, .yc-homework-description, .yc-admin-clarifications, .clarification-container) .richmedia, .md-editor-preview) .token:is(.keyword, .tag, .boolean, .constant)
+            color rgb(142, 200, 255) !important
+        :is(:is(.problem-content, .yc-contest-description, .yc-homework-description, .yc-admin-clarifications, .clarification-container) .richmedia, .md-editor-preview) .token:is(.number, .function)
+            color rgb(233, 194, 151) !important
+        :is(:is(.problem-content, .yc-contest-description, .yc-homework-description, .yc-admin-clarifications, .clarification-container) .richmedia, .md-editor-preview) .token:is(.operator, .punctuation)
+            color rgb(203, 213, 226) !important
+        :is(:is(.problem-content, .yc-contest-description, .yc-homework-description, .yc-admin-clarifications, .clarification-container) .richmedia, .md-editor-preview) .token:is(.string, .char, .attr-value)
+            color rgb(169, 215, 186) !important
+        :not(pre) > code[class*="language-"]
+            background-color surface_color !important
+            border separator_color !important
+        :where([data-mantine-color-scheme="dark"]) .m_302b9fb1
+            background-color rgba(surface_color, 0.15) !important
+        :where([data-mantine-color-scheme="dark"]) .m_77c9d27d::before
+            background-color rgba(surface_color, 0.15) !important
+        :where([data-mantine-color-scheme="dark"]) .m_c44ba933:active > .m_d8b5e363
+            background-color rgba(raised_color, 0.5) !important
+        :where([data-mantine-color-scheme="dark"]) .m_c44ba933:hover > .m_d8b5e363
+            background-color rgba(raised_color, 0.5) !important
+        :where([data-mantine-color-scheme="dark"]) .m_d8b5e363
+            background-color rgba(raised_color, 0.4) !important
+        a, .link, a:visited, .link:visited, a:hover, .link:hover, a:active, .link:active
+            color primary_text_color !important
+        a.menu__link.active, button.menu__link.active, a.menu__link.active:hover, button.menu__link.active:hover
+            background-color rgb(237, 95, 130) !important
+            color primary_text_color !important
+        a.menu__link:not(.disabled):hover, button.menu__link:not(.disabled):hover
+            color primary_text_color !important
+            background-color surface_color !important
+        blockquote
+            border-left-color separator_color !important
+        blockquote, blockquote.blue, blockquote.red, blockquote.yellow, blockquote.warn, blockquote.note
+            background-color surface_color !important
+            color primary_text_color !important
+        blockquote.blue
+            border-left-color rgb(0, 57, 107) !important
+        blockquote.note
+            border-left-color rgb(41, 103, 158) !important
+        blockquote.note::before
+            color rgb(41, 103, 158) !important
+        blockquote.red
+            border-left-color rgb(168, 8, 0) !important
+        blockquote.warn
+            border-left-color rgb(168, 8, 0) !important
+        blockquote.warn::before
+            color rgb(168, 8, 0) !important
+        blockquote.yellow
+            border-left-color rgb(143, 124, 0) !important
+        code[class*="language-"], pre[class*="language-"]
+            color primary_text_color !important
+        h1, h2, h3, h4, h5, h6
+            color primary_text_color !important
+        hr
+            border-bottom-color separator_color !important
+        label:not(.quick-input-list-label)
+            color primary_text_color !important
+        pre, code
+            background-color surface_color !important
+        pre[class*="language-"]
+            border separator_color !important
+            background-color surface_color !important
+        pre[class*="language-"]::selection, pre[class*="language-"] ::selection, code[class*="language-"]::selection, code[class*="language-"] ::selection
+            background-color rgba(173, 214, 255, 0.15) !important
+        // @site-dark-rules-end
+
+    //! 顶栏 -----------------------------------------------------------
+
+    // 改版后站点把原来的顶部横幅并进了固定导航条：logo 与站点名现在都在
+    // #menu.nav 里（见下），只有窄屏下才显示 .header--mobile 这条细顶栏。
+    // 因此「顶栏亚克力」这个开关现在作用于窄屏顶栏，桌面端由「侧栏亚克力」
+    // （#menu.nav）负责。
+    .header--mobile
+        background-image none !important
+        if header-acrylic
+            glass(header_bg_color, 0.55)
+        else
+            background-color header_bg_color !important
+        color #fff !important
+
+        .header--mobile__domain
+        .header__hamburger
+            color #fff !important
+
+        .hamburger-inner
+            &
+            &:before
+            &:after
+                background-color #fff !important
+
+    // 固定导航条
+    #menu.nav
+        if nav-acrylic
+            glass(navbar_bg_color)
+        else
+            background-color navbar_bg_color !important
+        color navbar_text_color !important
+
+        // 覆盖站点自带的滚动变色
+        &.floating
+            if nav-acrylic
+                glass(navbar_bg_color)
+            else
+                background-color navbar_bg_color !important
+            box-shadow none
+
+        .nav__list-item
+            color navbar_text_color !important
+
+        .nav__item
+        .nav__item--round
+            color navbar_text_color !important
+            border-radius 6px
+            &:active
+            &:visited
+                color navbar_text_color !important
+            &:hover
+                color navbar_text_color !important
+                background button_hover_bg_color
+            &.nav--active
+                border-color link_hover_color
+                &:before
+                    box-shadow none
+
+    // 侧栏（小屏幕下的抽屉菜单）
+    .slideout-menu
+        if nav-acrylic
+            glass(navbar_bg_color)
+        else
+            background-color navbar_bg_color !important
+        color navbar_text_color !important
+        opacity content-opacity
+
+    .slideout-overlay
+        opacity content-opacity
+
+    //! 卡片 -----------------------------------------------------------
+
+    // vj4 的卡片是 .section，原本是纯白 + 大阴影。
+    // 改版后的站点又加了几种独立的卡片容器（排名面板、个人主页热力图、
+    // 首页卡片），它们不在 .section 结构里，但外观相同，所以共用同一套配方
+    .section
+    .rank-panel
+    .profile-heatmap-card
+    .yc-home-card
+        if card-acrylic
+            // acrylic() 的伪元素是绝对定位的，必须给卡片建立定位上下文
+            position relative
+            // 与 argon-luogu 的卡片配方保持一致（0.6 / 20px）
+            acrylic(0.6, 20px)
+            box-shadow none !important
+        else
+            background board_color !important
+            box-shadow none !important
+        color post_text_color !important
+        border-color noMatterLineColor !important
+        // 保留原有的圆角
+        border-radius 10px
+
+        // 卡片内部的分区／标签容器
+        // 这些容器是 .section 的后代，主题会给它们刷上不透明底色
+        //（例如 youngcoder 的 .course-main-yc .section__body / .tab-layout /
+        // .tab-content 与 .course-yc-table th），它们会盖住上面那个
+        // z-index:-1 的亚克力伪元素，使卡片看起来是纯色、完全看不到毛玻璃
+        .section__header
+        .section__body
+        .section__tab-header
+        .tab-layout
+        .tab-content
+        .vertical-tabs
+        .horizontal-tabs
+        thead
+        tbody
+        tr
+        th
+        td
+            background none !important
+            background-image none !important
+
+        // 首页签到卡片：站点给内部的方块写死了浅色底
+        .homepage-checkin__body
+        .homepage-checkin__fortune
+        .homepage-checkin__countdowns
+        .homepage-checkin__fortune-column
+            background none !important
+            background-image none !important
+
+    // YCOJ 作业页的工具栏使用了独立的不透明底色
+    .layout--basic.page--homework_main .section
+        .hw-toolbar
+        .hw-search-row
+            background none !important
+
+    // YCOJ 比赛页使用自定义容器，不在 Hydro 的 .section 卡片结构内
+    .layout--basic.page--contest_main .contest-section
+        if card-acrylic
+            position relative
+            acrylic(0.6, 20px)
+            box-shadow none !important
+        else
+            background board_color !important
+            box-shadow none !important
+        color post_text_color !important
+        border-radius 10px
+
+        // 站点自定义过滤栏和表格容器会覆盖卡片的亚克力层
+        .filter-row
+        .contest-table-container
+        tbody
+        tr
+        th
+        td
+            background none !important
+
+    // YCOJ 比赛列表是独立于筛选栏的另一个容器，也需要单独建立亚克力层
+    .layout--basic.page--contest_main .contest-table-container
+        if card-acrylic
+            position relative
+            acrylic(0.6, 20px)
+            box-shadow none !important
+        else
+            background board_color !important
+            box-shadow none !important
+        color post_text_color !important
+        border-radius 10px
+
+        thead
+        tbody
+        tr
+        th
+        td
+            background none !important
+
+    .section__header
+        border-bottom 1px solid line_color
+        .section__title
+            color post_heading_color !important
+
+    .section__title
+        color post_heading_color !important
+
+    .section__table-header
+        background none !important
+        border-radius 10px 10px 0 0
+
+    .section__footer
+        border-top 1px solid line_color
+
+    .section__body
+    .section__list
+        color post_text_color !important
+
+    .section__list-item
+        border-top 1px solid line_color
+    
+
+    //! 表格 -----------------------------------------------------------
+
+    .data-table
+        color post_text_color
+        th
+            color post_heading_color !important
+            background-color board_color !important
+        tr
+            border-color line_color !important
+            background-color board_color !important
+        th
+            background-color board_color !important
+        td
+            border-color line_color !important
+            background-color board_color !important
+
+
+    //! 表单与按钮 -----------------------------------------------------
+
+    input.textbox
+    textarea.textbox
+    .textbox
+        color post_text_color !important
+        background-color textBoxBackgroudColor !important
+        // 站点自己给输入框配了明暗两套边框色，这里统一成主题分隔线色，
+        // 否则「浅色站点 + 深色主题」时输入框会留一条亮边框
+        border-color separator_color !important
+        border-radius 10px !important
+        &::placeholder
+            color sec_text_color
+
+    // 讨论区搜索框等没有 .textbox 的输入框同样处理
+    input.discussion-search-input
+        background-color textBoxBackgroudColor !important
+        border-color separator_color !important
+        color post_text_color !important
+
+    input
+    textarea
+        accent-color post_link_color
+
+    select
+    .select
+        color post_text_color !important
+        background-color transparent !important
+        border 1px solid line_color !important
+        border-radius 10px !important
+
+    .select-container.compact .select
+    .select.compact
+        border-radius 10px
+
+    .button
+        color button_text_color !important
+        background-color transparent !important
+        border 1px solid line_color !important
+        border-radius 10px
+        &:hover
+        &:focus
+            color button_text_color !important
+            background-color button_hover_bg_color !important
+            border-color line_color !important
+            box-shadow none !important
+        &.primary
+            color #fff !important
+            background-color post_link_color !important
+            border-color post_link_color !important
+
+    .search > input
+        border-radius 10px 0 0 0
+
+    .search > button
+        border-radius 0 10px 0 0
+
+    //! 弹层 -----------------------------------------------------------
+
+    .dropdown .menu
+    .drop-element .menu
+        border-radius 10px
+        if anymore-acrylic
+            acrylic-bg()
+        else
+            background board_color !important
+        color post_text_color
+        border 1px solid line_color
+
+    .menu__item
+        color post_text_color !important
+        border-radius 6px
+        &:hover
+            background button_hover_bg_color !important
+
+    .dialog__content
+        border-radius 10px
+        if anymore-acrylic
+            acrylic-bg()
+        else
+            background board_color !important
+
+    .dialog
+        background rgba(0, 0, 0, .45) !important
+
+    .dialog__title
+    .dialog__body
+        color post_text_color
+
+    .data-tooltip
+    data-tooltip
+    span.time.relative.tooltip
+        border-radius 10px
+        if anymore-acrylic
+            acrylic-bg()
+        else
+            background board_color !important
+        color post_text_color !important
+
+    //! 正文与高亮 -----------------------------------------------------
+
+    .typo
+        color post_text_color !important
+        h1
+        h2
+        h3
+        h4
+        h5
+        h6
+            color post_heading_color
+        a
+        a:active
+        a:hover
+        a:visited
+            color post_link_color
+        blockquote
+            border-radius 7px
+            border-left 3px solid line_color
+            background rgba(acrylic_bg_color, .25)
+            color sec_text_color
+        hr
+            border-color line_color
+        table
+        th
+        td
+            border-color line_color
+
+    .typo .code-toolbar
+        border-radius 10px
+
+    code
+        background inlinecode_bg_color !important
+        color codeblock_text_color !important
+        border-radius 6px
+
+    pre
+        background codeblock_bg_color !important
+        color codeblock_text_color !important
+        border-radius 10px
+        border 1px solid codeblock_line_color
+        code
+            background none !important
+            color inherit !important
+
+    pre[class*=language-]
+        border-radius 10px
+
+    div.code-toolbar > .toolbar > .toolbar-item > a
+    div.code-toolbar > .toolbar > .toolbar-item > button
+    div.code-toolbar > .toolbar > .toolbar-item > span
+        border-radius 0 0 0 10px
+
+    .syntax-hl .token.cdata
+    .syntax-hl .token.comment
+    .syntax-hl .token.doctype
+    .syntax-hl .token.prolog
+        color token_comment_color if token_comment_color
+        font-style italic
+
+    .syntax-hl .token.string
+        color token_string_color if token_string_color
+
+    .syntax-hl .token.atrule
+    .syntax-hl .token.attr-value
+    .syntax-hl .token.keyword
+        color token_keyword_color if token_keyword_color
+
+    .syntax-hl .token.function
+        color token_function_color if token_function_color
+
+    .syntax-hl .token.boolean
+    .syntax-hl .token.inserted
+    .syntax-hl .token.number
+    .syntax-hl .token.symbol
+    .syntax-hl .token.url
+        color token_number_color if token_number_color
+
+    .syntax-hl .token.operator
+    .syntax-hl .token.punctuation
+        color token_punct_color if token_punct_color
+
+    .syntax-hl .token.class-name
+        color token_class_color if token_class_color
+
+    .syntax-hl .token.attr-name
+    .syntax-hl .token.entity
+    .syntax-hl .token.property
+        color token_attr_color if token_attr_color
+
+    .syntax-hl .token.regex
+        color token_regex_color if token_regex_color
+
+    //! 其余组件 -------------------------------------------------------
+
+    .numbox__text
+    .supplementary
+        color sec_text_color
+
+    .chip-list__item
+        border-radius 10px
+
+    .pager
+        border-top 2px solid line_color
+        .pager__item
+            border-top 2px solid line_color
+            color post_text_color !important
+            &:hover
+                border-top-color link_hover_color
+        .pager__item.active
+            border-top-color post_link_color
+
+    .user-profile-badge
+        border-radius 7px
+        box-shadow 0px 1px 3px rgba(0, 0, 0, .25)
+
+    .user-profile-name
+        color post_text_color !important
+
+    .contest-sidebar__bg
+        border-radius 7px 7px 0 0
+
+    .problem__tag-link
+        border-radius 10px
+
+    .bp4-tag.bp4-minimal:not([class *= bp4-intent-])
+        border-radius 10px
+
+    .autocomplete-wrapper
+        border-radius 10px
+
+    .balancer__body
+        color post_text_color
+
+    #status > .section__header
+        padding 0.78125rem .9375rem
+
+    //! 底栏 -----------------------------------------------------------
+
+    .footer
+        acrylic-bg() if footer-acrylic
+        background board_color !important unless footer-acrylic
+        color sec_text_color
+        hr
+            border-color line_color
+        .footer__category__item
+        .footer__extra-link-item
+        .footer__category__expander
+            color sec_text_color !important
+        a
+            color sec_text_color !important
+            &:hover
+                color post_link_color !important
+
+    // 页面顶部的加载进度条（nprogress 自己写死了品牌蓝）
+    #nprogress .bar
+        background post_link_color !important
+    #nprogress .peg
+        box-shadow 0 0 10px post_link_color, 0 0 5px post_link_color !important
+
+    //! 保留原有特性 ---------------------------------------------------
+
+    // 内容不透明度（原本作用于 .columns / .slideout-menu）
+    .columns
+        opacity content-opacity
+
+    if animations
+        @keyframes argon-card-enter
+            from
+                opacity 0
+                transform translateY(1.5rem)
+            to
+                opacity 1
+                transform translateY(0)
+
+        .section
+        .rank-panel
+        .profile-heatmap-card
+        .contest-section
+        .contest-table-container
+            animation argon-card-enter .45s ease-out both
+
+        .section
+        .button
+        .textbox
+        .pager__item
+        .typo a
+            transition background-color .3s ease, color .3s ease, border-color .3s ease

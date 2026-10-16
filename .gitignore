@@ -1,0 +1,6 @@
+# 登录账号，别提交
+Password.txt
+
+# tools/collect-site-tokens.js 采集出来的快照，只放本地
+tools/snapshots/*
+!tools/snapshots/.gitkeep
