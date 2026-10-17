@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name         Power-YoungCoder
 @namespace    https://github.com/oyeah028/Power-YoungCoder
-@version      1.1.0
+@version      1.1.2
 @description  为 YoungCoder 修改设计：亮/暗双配色、可开关的亚克力材质、自定义背景与字体，并保留原有的圆角。改版后的站点把组件颜色收拢成了 CSS 变量（--home-*、--list-*、--yc-* 等），脚本会把它们一并映射到本主题调色板，避免新版组件保持站点原色。
 @author       oyeah(deepseek二开)
 @license      CC-BY-NC-SA-4.0
@@ -15,7 +15,7 @@
 @var select bg-preset "背景方案" {
     "自定义（用下面的链接）": "custom",
 }
-@var text main-background "自定义背景图片（写成 url(...) 形式）" "url(https://pic.imgdb.cn/item/62df71a5f54cd3f9376f351d.jpg)"
+@var text main-background "自定义背景图片（写成 url(...) 形式）" "url(https://cdn.luogu.com.cn/upload/image_hosting/6inm42cv.webp)"
 @var checkbox background-fixed "背景固定不随页面滚动" 1
 
 @var text content-opacity "内容不透明度（0 为完全透明，1 为不透明）" 1
@@ -1835,8 +1835,10 @@
         td
             background none !important
 
+    // 卡片标题、页脚下的 1px 分隔线在亚克力上看着像一道划痕，统一去掉
+    //（表格行线与列表项的分隔线保留，否则内容会糊成一片）
     .section__header
-        border-bottom 1px solid line_color
+        border-bottom none !important
         .section__title
             color post_heading_color !important
 
@@ -1848,7 +1850,7 @@
         border-radius 10px 10px 0 0
 
     .section__footer
-        border-top 1px solid line_color
+        border-top none !important
 
     .section__body
     .section__list
@@ -2093,8 +2095,50 @@
     .user-profile-name
         color post_text_color !important
 
-    .contest-sidebar__bg
-        border-radius 7px 7px 0 0
+    // 比赛／作业详情页用 1px 线把卡片切成工具栏、属性区、主持人等几段，
+    // 卡片改成亚克力后这些线会显得突兀，一并去掉（表格行线保留）
+    #panel .yc-contest-overview-nav
+    #panel .yc-hw-overview-nav
+    #panel .yc-hw-panel-header
+        border-bottom none !important
+
+    #panel .yc-contest-hero-footer
+    #panel .yc-hw-hero-body
+    #panel .yc-hw-hero-footer
+    #panel .yc-hw-dates
+    #panel .yc-hw-side-details
+        border-top none !important
+
+    // 比赛／作业侧栏顶部的封面卡。站点原本铺一张蓝色渐变（并在右上方画两个
+    // 白色圆环），文字被写死成白色；这里把封面还原成透明，让侧栏卡片的亚克力
+    // 直接透上来，标题和元信息改用主题色（否则浅色模式下白字会糊在浅色亚克力上）
+    #panel .yc-side-navigation.side > .contest-sidebar__bg
+        --yc-cover-ink: primary_text_color !important
+        --yc-cover-muted: secondary_text_color !important
+        background none !important
+        color primary_text_color !important
+        border-bottom none !important
+        border-radius inherit
+
+        // 站点用这两个伪元素画装饰圆环，透明背景后会变成悬空的细线
+        &:before
+        &:after
+            content none !important
+
+        .yc-cover-symbol
+        .yc-cover-rule
+            border-color separator_color !important
+            background rgba(acrylic_bg_color, .35) !important
+            color primary_text_color !important
+
+    // 侧栏的属性列表（比赛／作业／题目信息）站点会刷一层不透明的
+    // --yc-info-bg，在亚克力卡片上会留下一条硬分界，这里让它透出卡片本身；
+    // 标签用的是写死的浅灰（--contest-muted），换成主题的次要文字色
+    #panel .yc-side-navigation > .section__body
+        background none !important
+
+        dt
+            color secondary_text_color !important
 
     .problem__tag-link
         border-radius 10px
