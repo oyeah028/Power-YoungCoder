@@ -1743,10 +1743,19 @@
     // vj4 的卡片是 .section，原本是纯白 + 大阴影。
     // 改版后的站点又加了几种独立的卡片容器（排名面板、个人主页热力图、
     // 首页卡片），它们不在 .section 结构里，但外观相同，所以共用同一套配方
-    .section
-    .rank-panel
-    .profile-heatmap-card
-    .yc-home-card
+    //
+    // 选择器前面挂 html:root #panel 是为了权重：改版后的站点用
+    // `#panel .页 .面板 { background: var(--contest-surface) !important }` 这种
+    // 「ID + 双类 + !important」的写法给卡片和表格刷底色，普通 .section 压不住，
+    // 卡片会退回纯色、把下面那层 z-index:-1 的亚克力伪元素整个盖住。
+    // html:root 把权重抬到 (1 id, 2 class, 1 type)，比站点的 (1, 2, 0) 高，
+    // 含义仍然是同一批元素，不改作用范围。
+    // 注意：这里不能用 :is(...) 收拢，Stylus 展开嵌套选择器时会把 :is() 里的
+    // 最后一个分支拽到括号外面，后代规则会全部失效
+    html:root #panel .section
+    html:root #panel .rank-panel
+    html:root #panel .profile-heatmap-card
+    html:root #panel .yc-home-card
         if card-acrylic
             // acrylic() 的伪元素是绝对定位的，必须给卡片建立定位上下文
             position relative
@@ -1762,10 +1771,10 @@
         border-radius 10px
 
         // 卡片内部的分区／标签容器
-        // 这些容器是 .section 的后代，主题会给它们刷上不透明底色
-        //（例如 youngcoder 的 .course-main-yc .section__body / .tab-layout /
-        // .tab-content 与 .course-yc-table th），它们会盖住上面那个
-        // z-index:-1 的亚克力伪元素，使卡片看起来是纯色、完全看不到毛玻璃
+        // 这些容器是卡片的直接后代，站点会给它们刷上不透明底色
+        //（例如 .section__body、.tab-layout、.tab-content、表格单元格、
+        // 首页公告里的 <details> 折叠块），它们会盖住上面那个 z-index:-1 的
+        // 亚克力伪元素，使卡片看起来是纯色、完全看不到毛玻璃
         .section__header
         .section__body
         .section__tab-header
@@ -1773,6 +1782,9 @@
         .tab-content
         .vertical-tabs
         .horizontal-tabs
+        details
+        summary
+        table
         thead
         tbody
         tr
@@ -1788,6 +1800,7 @@
         .homepage-checkin__fortune-column
             background none !important
             background-image none !important
+
 
     // YCOJ 作业页的工具栏使用了独立的不透明底色
     .layout--basic.page--homework_main .section
@@ -1835,10 +1848,8 @@
         td
             background none !important
 
-    // 卡片标题、页脚下的 1px 分隔线在亚克力上看着像一道划痕，统一去掉
-    //（表格行线与列表项的分隔线保留，否则内容会糊成一片）
     .section__header
-        border-bottom none !important
+        border-bottom 1px solid line_color
         .section__title
             color post_heading_color !important
 
@@ -1850,7 +1861,7 @@
         border-radius 10px 10px 0 0
 
     .section__footer
-        border-top none !important
+        border-top 1px solid line_color
 
     .section__body
     .section__list
@@ -2095,24 +2106,12 @@
     .user-profile-name
         color post_text_color !important
 
-    // 比赛／作业详情页用 1px 线把卡片切成工具栏、属性区、主持人等几段，
-    // 卡片改成亚克力后这些线会显得突兀，一并去掉（表格行线保留）
-    #panel .yc-contest-overview-nav
-    #panel .yc-hw-overview-nav
-    #panel .yc-hw-panel-header
-        border-bottom none !important
-
-    #panel .yc-contest-hero-footer
-    #panel .yc-hw-hero-body
-    #panel .yc-hw-hero-footer
-    #panel .yc-hw-dates
-    #panel .yc-hw-side-details
-        border-top none !important
-
-    // 比赛／作业侧栏顶部的封面卡。站点原本铺一张蓝色渐变（并在右上方画两个
+    // 比赛／作业／课程侧栏顶部的封面卡。站点原本铺一张蓝色渐变（并在右上方画两个
     // 白色圆环），文字被写死成白色；这里把封面还原成透明，让侧栏卡片的亚克力
     // 直接透上来，标题和元信息改用主题色（否则浅色模式下白字会糊在浅色亚克力上）
+    // 课程页的侧栏只有 .section.side（没有 .yc-side-navigation），所以两个都要列
     #panel .yc-side-navigation.side > .contest-sidebar__bg
+    #panel .section.side > .contest-sidebar__bg
         --yc-cover-ink: primary_text_color !important
         --yc-cover-muted: secondary_text_color !important
         background none !important
@@ -2135,6 +2134,7 @@
     // --yc-info-bg，在亚克力卡片上会留下一条硬分界，这里让它透出卡片本身；
     // 标签用的是写死的浅灰（--contest-muted），换成主题的次要文字色
     #panel .yc-side-navigation > .section__body
+    #panel .section.side > .section__body
         background none !important
 
         dt

@@ -39,6 +39,12 @@ python tools/sync-theme.py
   换行后第二个 `domain()` 会让 Stylus 前处理器直接解析失败
   （`stylus:48:1 Cannot read properties of undefined (reading 'name')`），
   整个样式都会加载不出来。
+* 卡片的选择器前面都挂了 `html:root #panel`。站点的新版面板用
+  `#panel .页 .面板 { background: var(--xx-surface) !important }` 这种「ID + 双类 + `!important`」
+  的方式刷底色，权重高于普通的 `.section`，卡片就会退回纯色、把亚克力层整个盖住；
+  `html:root` 只是把权重抬高一位，作用范围不变。改这一段时别把前缀去掉，
+  也别用 `:is()` 收拢选择器——Stylus 展开嵌套后代选择器时会把 `:is()` 的最后一个
+  分支拽到括号外面，后代规则会静默失效。
 * `tools/snapshots/` 只放在本地、不提交（见 `.gitignore`）。
 * Mantine / Element Plus / Monaco 这些第三方组件库有自己的主题开关，脚本不动它们的变量。
 * 卡片的背景由脚本自己画（亚克力层），生成时会计过 `.section` 这类容器，不再写死它们的底色。
