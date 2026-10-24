@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-"""Regenerate the site-specific blocks of Power-YoungCoder.user.styl.
+"""Regenerate the site token mapping in Power-YoungCoder.user.styl.
 
-The revamped OJ funnels component colours through CSS custom properties and
-keeps a second, hard-coded palette for its own dark mode.  The userstyle forces
-its own palette, so it has to write both of them itself.  This script derives
-those blocks from snapshots collected with tools/collect-site-tokens.js:
+The revamped OJ funnels component colours through CSS custom properties.  The
+userstyle forces its own palette, so it remaps the neutral tokens from snapshots
+collected with tools/collect-site-tokens.js:
 
   1. tools/snapshots/*.json       one file per page type, see the collector
   2. python tools/sync-theme.py   rewrites the two generated sections in place
 
 Generated sections (do not edit by hand):
-  * site-token-values-light / site-token-values-dark   (property remap)
-  * the block between @site-dark-rules-begin / -end    (hard-coded colours)
+  * site-token-values-light / site-token-values-dark   (grouped property remap)
 """
 import glob
 import json
@@ -66,24 +64,6 @@ SEGMENT_ROLE = {
     'meta': 'muted', 'placeholder': 'muted', 'hint': 'muted', 'dim': 'muted',
     'note': 'muted',
 }
-DARK_PARTS = [
-    r':is\([^()]*theme--dark[^()]*\)',
-    r':is\([^()]*data-theme="dark"[^()]*\)',
-    r'\.theme--dark',
-    r'\[data-theme="dark"\]',
-]
-# containers the userstyle turns into acrylic cards itself (see the stylesheet):
-# the site's own dark background is skipped for these, our acrylic layer shows
-CARD_CONTAINERS = [
-    'yc-domain-bulletin-card', 'yc-home-card', 'yc-hw-list-panel', 'yc-hw-intro',
-    'yc-profile-shell', 'yc-profile-content', 'yc-problem-overview', 'yc-problem-statement',
-    'yc-contest-panel', 'yc-side-navigation', 'yc-homework-sidebar', 'yc-contest-sidebar',
-    'yc-hw-overview', 'yc-homework-description',
-]
-SKIP_SELECTOR = re.compile(r'^(?::root|html\b|body\b|#panel$)'
-                          r'|\.button\b|\.textbox\b|^(?:input|select|textarea)\b')
-PROTECTED_BG = re.compile(r'\.section\b|\.data-table\b'
-                          r'|' + '|'.join(re.escape(c) for c in CARD_CONTAINERS))
 
 
 def hex_rgb(value):
@@ -140,7 +120,7 @@ def role_of(token):
 
 
 def load_snapshots():
-    light, dark, hard = defaultdict(set), defaultdict(set), {}
+    light, dark = defaultdict(set), defaultdict(set)
     files = sorted(glob.glob(os.path.join(SNAPSHOTS, '*.json')))
     if not files:
         sys.exit(f'no snapshots in {SNAPSHOTS}; run tools/collect-site-tokens.js first')
@@ -152,37 +132,10 @@ def load_snapshots():
                 for value in ([values] if isinstance(values, str) else (values or [])):
                     if value:
                         target[token].add(value)
-        for item in data.get('darkHard', []):
-            base = re.sub(r'\s+', ' ', item['sel']).strip()
-            for part in DARK_PARTS:
-                base = re.sub(part, '', base)
-            base = re.sub(r'\s*,\s*', ', ', base)
-            base = re.sub(r'\s+', ' ', base).strip()
-            base = re.sub(r'^[>+~]\s*', '', base)
-            if not base or SKIP_SELECTOR.search(base):
-                continue
-            decls = [d.replace(' !important', '').strip() for d in item['decls']]
-            if decls:
-                hard.setdefault(base, decls)
     print(f'snapshots: {len(files)} pages, {len(light)} light / {len(dark)} dark tokens, '
-          f'{len(hard)} hard-coded dark rules')
+          'legacy hard-coded palette skipped')
     return ({k: sorted(v) for k, v in light.items()},
-            {k: sorted(v) for k, v in dark.items()}, hard)
-
-
-def palette_value(prop, value):
-    """Our palette symbol for a neutral colour, else None (keep the site's)."""
-    rgb = hex_rgb(value)
-    if rgb is None or max(rgb) - min(rgb) > TINT_LIMIT:
-        return None
-    lum = luminance(rgb)
-    if prop.startswith(('background', 'fill')):
-        return 'surface_color' if lum < 0.16 else 'raised_color'
-    if prop.startswith(('border', 'outline')):
-        return 'separator_color'
-    if prop == 'color':
-        return 'primary_text_color' if lum > 0.45 else 'secondary_text_color'
-    return None
+            {k: sorted(v) for k, v in dark.items()})
 
 
 def token_expr(token, mode, light, dark):
@@ -217,7 +170,7 @@ def token_expr(token, mode, light, dark):
 
 
 def build_token_block(mode, light, dark):
-    lines = []
+    pairs = []
     kept = 0
     for token in sorted(set(light) | set(dark)):
         if token.startswith('--yc-dark-') or FOREIGN_NAME.match(token):
@@ -231,43 +184,61 @@ def build_token_block(mode, light, dark):
         if expr.startswith('*'):
             kept += 1
             expr = expr[1:]
-        lines.append(f'        {token}: {expr} !important')
-    return lines, kept
+        pairs.append((token, expr))
+    return pairs, kept
 
 
-def build_dark_rules(hard):
+def compact_token_lines(pairs):
+    """Group equal values into Stylus mixin calls while keeping every site token."""
+    groups = {}
+    for token, value in pairs:
+        groups.setdefault(value, []).append(token)
+
     lines = []
-    for base, decls in sorted(hard.items()):
-        kept = []
-        for decl in decls:
-            prop, _, value = decl.partition(':')
-            prop, value = prop.strip(), value.strip()
-            if prop in ('background', 'background-color') and PROTECTED_BG.search(base):
-                continue  # the userstyle paints those itself (acrylic layer)
-            if re.search(r'gradient', value):
-                kept.append(f'{prop} {value}')
-                continue
-            mapped = palette_value(prop, value)
-            if mapped and prop.startswith('background'):
-                alpha = RGB.search(value)
-                if alpha and alpha.group(4) is not None and float(alpha.group(4)) < 1:
-                    kept.append(f'{prop} rgba({mapped}, {alpha.group(4)})')
-                else:
-                    kept.append(f'{prop} {mapped}')
-            elif mapped:
-                kept.append(f'{prop} {mapped}')
-            else:
-                kept.append(f'{prop} {value}')
-        if kept:
-            lines.append(f'    {base}')
-            lines.extend(f'        {decl} !important' for decl in kept)
+    for value, tokens in groups.items():
+        names = ' '.join(f"'{token}'" for token in tokens)
+        lines.append(f'        set-theme-tokens({names}, {value})')
     return lines
 
 
-def splice(styl, token_lines, rule_lines):
+def remove_mixin(styl, name):
+    marker = f'    {name}()\n'
+    start = styl.find(marker)
+    if start < 0:
+        return styl
+    body_start = start + len(marker)
+    match = re.search(r'(?m)^    \S', styl[body_start:])
+    if match is None:
+        sys.exit(f'cannot find end of {name}')
+    return styl[:start] + styl[body_start + match.start():]
+
+
+def remove_token_helper(styl):
+    marker = '    set-theme-tokens(tokens, value)\n'
+    start = styl.find(marker)
+    if start < 0:
+        return styl
+    comment = '    // 同值 token 合并成一条 mixin 调用，编译后的变量与逐条声明完全一致。\n'
+    comment_start = styl.rfind(comment, 0, start)
+    if comment_start >= 0:
+        start = comment_start
+    end = styl.find('\n\n', start)
+    if end < 0:
+        sys.exit('cannot find end of set-theme-tokens helper')
+    return styl[:start] + styl[end + 2:]
+
+
+def splice(styl, token_lines):
     # ---- token values (two mixins, called by the rule below the anchor)
-    styl = re.sub(r'^    site-token-values-(?:light|dark)\(\)\n(?:        --.*\n)+', '', styl, flags=re.M)
-    mixin = ''
+    for name in ('light', 'dark'):
+        styl = remove_mixin(styl, f'site-token-values-{name}')
+    styl = remove_token_helper(styl)
+    mixin = (
+        '    // 同值 token 合并成一条 mixin 调用，编译后的变量与逐条声明完全一致。\n'
+        '    set-theme-tokens(tokens, value)\n'
+        '        for token in tokens\n'
+        '            {token}: value !important\n\n'
+    )
     for mode, lines in token_lines.items():
         mixin += f'    site-token-values-{mode}()\n' + '\n'.join(lines) + '\n'
     anchor = '    html, body, body *\n'
@@ -275,50 +246,23 @@ def splice(styl, token_lines, rule_lines):
         sys.exit('token anchor not found - was the stylesheet edited?')
     styl = styl.replace(anchor, mixin + anchor)
 
-    # ---- hard-coded dark rules
-    body = '\n'.join('    ' + line if line.strip() else line for line in rule_lines)
-    section = (
-        '    //! 站点组件的硬编码颜色 -----------------------------------------\n'
-        '\n'
-        '    // 站点另有一批新版组件没有走 CSS 变量，而是自己写死了浅色值，再在深色\n'
-        '    // 模式下换另一套写死的深色值。脚本不依赖站点的主题开关，所以这里把站点\n'
-        '    // 深色模式那一套直接写进来：中性色映射到本主题调色板，状态色与强调色沿用\n'
-        '    // 站点取值。站点改版后可以用仓库 tools 目录里的脚本重新生成这一段。\n'
-        '    if dark-mode\n'
-        '        // @site-dark-rules-begin\n'
-        f'{body}\n'
-        '        // @site-dark-rules-end\n'
-        '\n'
-    )
-    marker = re.compile(r'    //! 站点组件的硬编码颜色.*?        // @site-dark-rules-end\n\n', re.S)
-    if marker.search(styl):
-        styl = marker.sub(section, styl, count=1)
-    else:
-        top = '    //! 顶栏 -----------------------------------------------------------\n'
-        if styl.count(top) != 1:
-            sys.exit('top-bar anchor not found - was the stylesheet edited?')
-        styl = styl.replace(top, section + top)
-
     # the splice is idempotent, so a leftover copy means the anchors moved
     for name in ('light', 'dark'):
         if len(re.findall(rf'^    site-token-values-{name}\(\)$', styl, re.M)) != 1:
             sys.exit(f'generated block for {name} appears more than once')
-    if styl.count('// @site-dark-rules-begin') != 1:
-        sys.exit('hard-coded dark rules block is not unique')
     return styl
 
 
 def main():
-    light, dark, hard = load_snapshots()
+    light, dark = load_snapshots()
     token_lines = {}
     for mode in ('light', 'dark'):
-        lines, kept = build_token_block(mode, light, dark)
-        token_lines[mode] = lines
-        print(f'  {mode}: {len(lines)} token values ({kept} keep the site colour)')
-    rule_lines = build_dark_rules(hard)
-    print(f'  hard-coded dark rules: {len(rule_lines)} lines')
+        pairs, kept = build_token_block(mode, light, dark)
+        token_lines[mode] = compact_token_lines(pairs)
+        print(f'  {mode}: {len(pairs)} token values in '
+              f'{len(token_lines[mode])} grouped calls ({kept} keep the site colour)')
     styl = open(STYL, encoding='utf-8').read().replace('\r\n', '\n')
-    styl = splice(styl, token_lines, rule_lines)
+    styl = splice(styl, token_lines)
     open(STYL, 'w', encoding='utf-8', newline='\r\n').write(styl)
     print(f'updated {os.path.relpath(STYL, ROOT)}')
 
